@@ -215,7 +215,10 @@ export default function Students() {
                     </td>
                     <td className="px-5 py-3 text-muted-foreground">{formatDob(s.date_of_birth)}</td>
                     <td className="px-5 py-3 text-right">
-                      <button className="text-primary text-xs font-semibold hover:underline inline-flex items-center gap-1">
+                      <button
+                        onClick={() => setViewStudentId(s.id)}
+                        className="text-primary text-xs font-semibold hover:underline inline-flex items-center gap-1"
+                      >
                         View <ChevronRight className="h-3 w-3" />
                       </button>
                     </td>

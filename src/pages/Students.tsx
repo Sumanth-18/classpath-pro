@@ -13,6 +13,7 @@ import {
 import { Plus, Search, ChevronRight, Loader2, Upload } from "lucide-react";
 import toast from "react-hot-toast";
 import { ImportStudentsDialog } from "@/components/ImportStudentsDialog";
+import { StudentDetailDialog } from "@/components/StudentDetailDialog";
 
 type Gender = "male" | "female" | "other";
 

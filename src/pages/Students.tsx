@@ -231,12 +231,35 @@ export default function Students() {
                     </td>
                     <td className="px-5 py-3 text-muted-foreground">{formatDob(s.date_of_birth)}</td>
                     <td className="px-5 py-3 text-right">
-                      <button
-                        onClick={() => setViewStudentId(s.id)}
-                        className="text-primary text-xs font-semibold hover:underline inline-flex items-center gap-1"
-                      >
-                        View <ChevronRight className="h-3 w-3" />
-                      </button>
+                      <div className="inline-flex items-center gap-1">
+                        <button
+                          onClick={() => setViewStudentId(s.id)}
+                          className="text-primary text-xs font-semibold hover:underline inline-flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-primary/5"
+                          aria-label={`View ${s.name}`}
+                        >
+                          View <ChevronRight className="h-3 w-3" />
+                        </button>
+                        {canAdd && (
+                          <>
+                            <button
+                              onClick={() => setEditStudent(s)}
+                              className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition"
+                              aria-label={`Edit ${s.name}`}
+                              title="Edit"
+                            >
+                              <Pencil className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(s)}
+                              className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition"
+                              aria-label={`Delete ${s.name}`}
+                              title="Remove"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

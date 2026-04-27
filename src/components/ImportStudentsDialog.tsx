@@ -158,7 +158,11 @@ export function ImportStudentsDialog({ open, onOpenChange, schoolId, sections, o
     const { error } = await supabase.from("students").insert(payload);
     setSubmitting(false);
     if (error) {
-      toast.error(error.message);
+      if (error.code === "23505" || /duplicate|unique/i.test(error.message)) {
+        toast.error("Some admission numbers already exist in the school. Please re-upload after fixing.");
+      } else {
+        toast.error(error.message);
+      }
       return;
     }
     toast.success(`Imported ${valid.length} student${valid.length === 1 ? "" : "s"}!`);

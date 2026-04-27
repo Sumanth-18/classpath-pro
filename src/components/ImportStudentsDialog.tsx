@@ -83,8 +83,18 @@ export function ImportStudentsDialog({ open, onOpenChange, schoolId, sections, o
     if (fileRef.current) fileRef.current.value = "";
   };
 
-  const handleFile = (file: File) => {
+  const handleFile = async (file: File) => {
     setFileName(file.name);
+
+    // Fetch existing admission numbers in this school for duplicate detection
+    const { data: existing } = await supabase
+      .from("students")
+      .select("admission_number")
+      .eq("school_id", schoolId);
+    const existingSet = new Set(
+      (existing ?? []).map((s) => s.admission_number.toLowerCase())
+    );
+
     Papa.parse<Record<string, string>>(file, {
       header: true,
       skipEmptyLines: true,
@@ -100,11 +110,13 @@ export function ImportStudentsDialog({ open, onOpenChange, schoolId, sections, o
           const section_id = sectionMap.get(classSection.toLowerCase()) ?? null;
 
           let error: string | undefined;
+          const admLower = admission_number.toLowerCase();
           if (!name) error = "Name required";
           else if (!admission_number) error = "Admission # required";
-          else if (seen.has(admission_number.toLowerCase())) error = "Duplicate adm# in file";
+          else if (seen.has(admLower)) error = "Duplicate adm# in file";
+          else if (existingSet.has(admLower)) error = "Adm# already exists in school";
           else if (classSection && !section_id) error = `Unknown section "${classSection}"`;
-          seen.add(admission_number.toLowerCase());
+          seen.add(admLower);
 
           return {
             name, admission_number, gender, date_of_birth, section_id,

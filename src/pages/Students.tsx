@@ -10,8 +10,9 @@ import {
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, Search, ChevronRight, Loader2 } from "lucide-react";
+import { Plus, Search, ChevronRight, Loader2, Upload } from "lucide-react";
 import toast from "react-hot-toast";
+import { ImportStudentsDialog } from "@/components/ImportStudentsDialog";
 
 type Gender = "male" | "female" | "other";
 
@@ -54,6 +55,7 @@ export default function Students() {
   const [search, setSearch] = useState("");
   const [filterSection, setFilterSection] = useState<string>("all");
   const [open, setOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
 
   const canAdd = role === "school_admin";
 
@@ -98,20 +100,39 @@ export default function Students() {
           <p className="text-sm text-muted-foreground mt-1">{students.length} active student{students.length === 1 ? "" : "s"} enrolled</p>
         </div>
         {canAdd && (
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button className="rounded-xl bg-gradient-brand hover:opacity-95 shadow-brand h-10">
-                <Plus className="h-4 w-4 mr-1.5" /> Add Student
-              </Button>
-            </DialogTrigger>
-            <AddStudentDialog
-              sections={sections}
-              schoolId={school!.id}
-              onAdded={() => { setOpen(false); load(); }}
-            />
-          </Dialog>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              className="rounded-xl h-10"
+              onClick={() => setImportOpen(true)}
+            >
+              <Upload className="h-4 w-4 mr-1.5" /> Import CSV
+            </Button>
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>
+                <Button className="rounded-xl bg-gradient-brand hover:opacity-95 shadow-brand h-10">
+                  <Plus className="h-4 w-4 mr-1.5" /> Add Student
+                </Button>
+              </DialogTrigger>
+              <AddStudentDialog
+                sections={sections}
+                schoolId={school!.id}
+                onAdded={() => { setOpen(false); load(); }}
+              />
+            </Dialog>
+          </div>
         )}
       </div>
+
+      {canAdd && school?.id && (
+        <ImportStudentsDialog
+          open={importOpen}
+          onOpenChange={setImportOpen}
+          schoolId={school.id}
+          sections={sections as any}
+          onImported={load}
+        />
+      )}
 
       {/* Filters */}
       <div className="card-soft p-4 flex flex-col sm:flex-row gap-3">

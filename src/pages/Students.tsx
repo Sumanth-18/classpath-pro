@@ -198,7 +198,7 @@ export default function Students() {
                   <th className="px-5 py-3 font-semibold">Class</th>
                   <th className="px-5 py-3 font-semibold">Gender</th>
                   <th className="px-5 py-3 font-semibold">DOB</th>
-                  <th className="px-5 py-3 font-semibold text-right">View</th>
+                  <th className="px-5 py-3 font-semibold text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>

@@ -244,13 +244,14 @@ function AddStudentDialog({
       return;
     }
     setSubmitting(true);
+    const normalizedAdm = adm.trim().toUpperCase();
     const { error } = await supabase.from("students").insert({
-      school_id: schoolId, section_id: section, name, admission_number: adm.trim(), gender,
+      school_id: schoolId, section_id: section, name, admission_number: normalizedAdm, gender,
     });
     setSubmitting(false);
     if (error) {
       if (error.code === "23505" || /duplicate|unique/i.test(error.message)) {
-        toast.error(`Admission number "${adm}" is already used in this school`);
+        toast.error(`Admission number "${normalizedAdm}" is already used in this school`);
       } else {
         toast.error(error.message);
       }

@@ -14,6 +14,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Students from "./pages/Students";
+import Staff from "./pages/Staff";
 import ComingSoon from "./pages/ComingSoon";
 import NotFound from "./pages/NotFound";
 
@@ -61,7 +62,7 @@ const App = () => (
             <Route path="/timetable" element={<Shell><ComingSoon title="Timetable" description="Section-wise class schedule" /></Shell>} />
             <Route path="/staff" element={
               <ProtectedRoute allow={["school_admin"]}>
-                <AppShell><ComingSoon title="Staff / HR" description="Staff directory, tasks and birthdays" /></AppShell>
+                <AppShell><Staff /></AppShell>
               </ProtectedRoute>
             } />
             <Route path="/connect" element={<Shell><ComingSoon title="Connect" description="Announcements, SMS and school calendar" /></Shell>} />

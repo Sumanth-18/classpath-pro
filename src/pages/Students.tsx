@@ -59,6 +59,7 @@ export default function Students() {
   const [open, setOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [viewStudentId, setViewStudentId] = useState<string | null>(null);
+  const [editStudent, setEditStudent] = useState<Student | null>(null);
 
   const canAdd = role === "school_admin";
 

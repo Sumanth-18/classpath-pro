@@ -10,10 +10,11 @@ import {
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, Search, ChevronRight, Loader2, Upload } from "lucide-react";
+import { Plus, Search, ChevronRight, Loader2, Upload, Pencil, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { ImportStudentsDialog } from "@/components/ImportStudentsDialog";
 import { StudentDetailDialog } from "@/components/StudentDetailDialog";
+import { EditStudentDialog } from "@/components/EditStudentDialog";
 
 type Gender = "male" | "female" | "other";
 
@@ -58,6 +59,7 @@ export default function Students() {
   const [open, setOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [viewStudentId, setViewStudentId] = useState<string | null>(null);
+  const [editStudent, setEditStudent] = useState<Student | null>(null);
 
   const canAdd = role === "school_admin";
 
@@ -83,6 +85,20 @@ export default function Students() {
   };
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [school?.id]);
+
+  const handleDelete = async (s: Student) => {
+    if (!confirm(`Remove ${s.name} from active students? This won't delete their records.`)) return;
+    const { error } = await supabase
+      .from("students")
+      .update({ is_active: false })
+      .eq("id", s.id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success(`${s.name} removed`);
+    load();
+  };
 
   const filtered = useMemo(() => {
     return students.filter((s) => {
@@ -182,7 +198,7 @@ export default function Students() {
                   <th className="px-5 py-3 font-semibold">Class</th>
                   <th className="px-5 py-3 font-semibold">Gender</th>
                   <th className="px-5 py-3 font-semibold">DOB</th>
-                  <th className="px-5 py-3 font-semibold text-right">View</th>
+                  <th className="px-5 py-3 font-semibold text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -215,12 +231,35 @@ export default function Students() {
                     </td>
                     <td className="px-5 py-3 text-muted-foreground">{formatDob(s.date_of_birth)}</td>
                     <td className="px-5 py-3 text-right">
-                      <button
-                        onClick={() => setViewStudentId(s.id)}
-                        className="text-primary text-xs font-semibold hover:underline inline-flex items-center gap-1"
-                      >
-                        View <ChevronRight className="h-3 w-3" />
-                      </button>
+                      <div className="inline-flex items-center gap-1">
+                        <button
+                          onClick={() => setViewStudentId(s.id)}
+                          className="text-primary text-xs font-semibold hover:underline inline-flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-primary/5"
+                          aria-label={`View ${s.name}`}
+                        >
+                          View <ChevronRight className="h-3 w-3" />
+                        </button>
+                        {canAdd && (
+                          <>
+                            <button
+                              onClick={() => setEditStudent(s)}
+                              className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition"
+                              aria-label={`Edit ${s.name}`}
+                              title="Edit"
+                            >
+                              <Pencil className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(s)}
+                              className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition"
+                              aria-label={`Delete ${s.name}`}
+                              title="Remove"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -234,6 +273,14 @@ export default function Students() {
         open={viewStudentId !== null}
         onOpenChange={(v) => { if (!v) setViewStudentId(null); }}
         studentId={viewStudentId}
+      />
+
+      <EditStudentDialog
+        open={editStudent !== null}
+        onOpenChange={(v) => { if (!v) setEditStudent(null); }}
+        student={editStudent}
+        sections={sections}
+        onSaved={load}
       />
     </div>
   );

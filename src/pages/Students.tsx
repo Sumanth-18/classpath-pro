@@ -13,6 +13,7 @@ import {
 import { Plus, Search, ChevronRight, Loader2, Upload } from "lucide-react";
 import toast from "react-hot-toast";
 import { ImportStudentsDialog } from "@/components/ImportStudentsDialog";
+import { StudentDetailDialog } from "@/components/StudentDetailDialog";
 
 type Gender = "male" | "female" | "other";
 
@@ -56,6 +57,7 @@ export default function Students() {
   const [filterSection, setFilterSection] = useState<string>("all");
   const [open, setOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [viewStudentId, setViewStudentId] = useState<string | null>(null);
 
   const canAdd = role === "school_admin";
 
@@ -213,7 +215,10 @@ export default function Students() {
                     </td>
                     <td className="px-5 py-3 text-muted-foreground">{formatDob(s.date_of_birth)}</td>
                     <td className="px-5 py-3 text-right">
-                      <button className="text-primary text-xs font-semibold hover:underline inline-flex items-center gap-1">
+                      <button
+                        onClick={() => setViewStudentId(s.id)}
+                        className="text-primary text-xs font-semibold hover:underline inline-flex items-center gap-1"
+                      >
                         View <ChevronRight className="h-3 w-3" />
                       </button>
                     </td>
@@ -224,6 +229,12 @@ export default function Students() {
           </div>
         )}
       </div>
+
+      <StudentDetailDialog
+        open={viewStudentId !== null}
+        onOpenChange={(v) => { if (!v) setViewStudentId(null); }}
+        studentId={viewStudentId}
+      />
     </div>
   );
 }

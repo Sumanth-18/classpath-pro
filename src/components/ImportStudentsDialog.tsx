@@ -103,7 +103,7 @@ export function ImportStudentsDialog({ open, onOpenChange, schoolId, sections, o
         const seen = new Set<string>();
         const parsed: ParsedRow[] = result.data.map((raw) => {
           const name = (raw.name ?? "").trim();
-          const admission_number = (raw.admission_number ?? raw["admission_no"] ?? "").trim();
+          const admission_number = (raw.admission_number ?? raw["admission_no"] ?? "").trim().toUpperCase();
           const classSection = (raw.class_section ?? raw["class"] ?? "").trim();
           const gender = normalizeGender(raw.gender ?? "");
           const date_of_birth = normalizeDate(raw.date_of_birth ?? raw["dob"] ?? "");

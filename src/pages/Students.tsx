@@ -57,6 +57,7 @@ export default function Students() {
   const [filterSection, setFilterSection] = useState<string>("all");
   const [open, setOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [viewStudentId, setViewStudentId] = useState<string | null>(null);
 
   const canAdd = role === "school_admin";
 

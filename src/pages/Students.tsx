@@ -274,6 +274,14 @@ export default function Students() {
         onOpenChange={(v) => { if (!v) setViewStudentId(null); }}
         studentId={viewStudentId}
       />
+
+      <EditStudentDialog
+        open={editStudent !== null}
+        onOpenChange={(v) => { if (!v) setEditStudent(null); }}
+        student={editStudent}
+        sections={sections}
+        onSaved={load}
+      />
     </div>
   );
 }

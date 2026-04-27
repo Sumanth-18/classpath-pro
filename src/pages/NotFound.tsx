@@ -1,21 +1,26 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { SchoolOSLogo } from "@/components/SchoolOSLogo";
 
 const NotFound = () => {
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    console.error("404 Error: User attempted to access non-existent route:", location.pathname);
+    console.error("404:", location.pathname);
   }, [location.pathname]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">404</h1>
-        <p className="mb-4 text-xl text-muted-foreground">Oops! Page not found</p>
-        <a href="/" className="text-primary underline hover:text-primary/90">
-          Return to Home
-        </a>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-hero p-4">
+      <div className="text-center max-w-sm">
+        <div className="flex justify-center mb-6"><SchoolOSLogo size="md" /></div>
+        <div className="text-7xl font-display font-bold text-brand-600">404</div>
+        <h1 className="font-display text-xl font-semibold mt-2">Page not found</h1>
+        <p className="text-sm text-muted-foreground mt-2 mb-6">
+          We couldn't find <code className="text-xs bg-muted px-1.5 py-0.5 rounded">{location.pathname}</code>
+        </p>
+        <Button onClick={() => navigate("/dashboard")} className="rounded-xl bg-gradient-brand">Back to Dashboard</Button>
       </div>
     </div>
   );

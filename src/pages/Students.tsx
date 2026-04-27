@@ -86,6 +86,20 @@ export default function Students() {
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [school?.id]);
 
+  const handleDelete = async (s: Student) => {
+    if (!confirm(`Remove ${s.name} from active students? This won't delete their records.`)) return;
+    const { error } = await supabase
+      .from("students")
+      .update({ is_active: false })
+      .eq("id", s.id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success(`${s.name} removed`);
+    load();
+  };
+
   const filtered = useMemo(() => {
     return students.filter((s) => {
       const matchSearch = !search ||

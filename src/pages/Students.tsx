@@ -229,6 +229,12 @@ export default function Students() {
           </div>
         )}
       </div>
+
+      <StudentDetailDialog
+        open={viewStudentId !== null}
+        onOpenChange={(v) => { if (!v) setViewStudentId(null); }}
+        studentId={viewStudentId}
+      />
     </div>
   );
 }

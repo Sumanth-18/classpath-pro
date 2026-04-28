@@ -22,6 +22,8 @@ export interface StaffRow {
   phone: string | null;
   is_active: boolean;
   role: StaffRole;
+  invite_status: "invited" | "active" | "expired";
+  invited_at: string | null;
   staff: {
     id: string;
     employee_id: string | null;
@@ -30,6 +32,17 @@ export interface StaffRow {
     date_of_joining: string | null;
     salary: number | null;
   } | null;
+}
+
+type InviteBadge = "active" | "invited" | "expired";
+
+function inviteState(r: StaffRow): InviteBadge {
+  if (r.invite_status === "active") return "active";
+  if (r.invited_at) {
+    const days = (Date.now() - new Date(r.invited_at).getTime()) / 86_400_000;
+    if (days > 7) return "expired";
+  }
+  return "invited";
 }
 
 function getInitials(name: string) {

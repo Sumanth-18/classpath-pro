@@ -92,6 +92,7 @@ export function ImportStaffDialog({ open, onOpenChange, schoolId, onImported }: 
       transformHeader: (h) => h.trim().toLowerCase().replace(/\s+/g, "_"),
       complete: (result) => {
         const seen = new Set<string>();
+        const seenEmpIds = new Set<string>();
         const parsed: ParsedRow[] = result.data.map((raw) => {
           const name = (raw.name ?? "").trim();
           const email = (raw.email ?? "").trim().toLowerCase();
@@ -100,6 +101,7 @@ export function ImportStaffDialog({ open, onOpenChange, schoolId, onImported }: 
           const designation = (raw.designation ?? "").trim();
           const department = (raw.department ?? "").trim() || "Teaching";
           const employee_id = (raw.employee_id ?? raw["emp_id"] ?? "").trim();
+          const empIdLower = employee_id.toLowerCase();
           const date_of_joining = normalizeDate(raw.date_of_joining ?? raw["doj"] ?? "");
           const salaryRaw = (raw.salary ?? "").trim();
           const salary = salaryRaw ? Number(salaryRaw) : null;
@@ -110,8 +112,11 @@ export function ImportStaffDialog({ open, onOpenChange, schoolId, onImported }: 
           else if (!/^\S+@\S+\.\S+$/.test(email)) error = "Invalid email";
           else if (seen.has(email)) error = "Duplicate email in file";
           else if (existingEmails.has(email)) error = "Email already exists in school";
+          else if (employee_id && seenEmpIds.has(empIdLower)) error = "Duplicate employee ID in file";
+          else if (employee_id && existingEmpIds.has(empIdLower)) error = "Employee ID already exists in school";
           else if (salary !== null && Number.isNaN(salary)) error = "Invalid salary";
           seen.add(email);
+          if (employee_id) seenEmpIds.add(empIdLower);
 
           return { name, email, phone, role, designation, department, employee_id, date_of_joining, salary, _error: error };
         });

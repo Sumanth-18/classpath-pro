@@ -740,6 +740,8 @@ export type Database = {
           created_at: string
           email: string | null
           id: string
+          invite_status: string
+          invited_at: string | null
           is_active: boolean | null
           name: string
           phone: string | null
@@ -752,6 +754,8 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          invite_status?: string
+          invited_at?: string | null
           is_active?: boolean | null
           name: string
           phone?: string | null
@@ -764,6 +768,8 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          invite_status?: string
+          invited_at?: string | null
           is_active?: boolean | null
           name?: string
           phone?: string | null

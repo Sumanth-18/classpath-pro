@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Plus, Search, Loader2, Pencil, Trash2, BookOpen, Upload, Mail, Phone } from "lucide-react";
+import { Plus, Search, Loader2, Pencil, Trash2, BookOpen, Upload, Mail, Phone, Send } from "lucide-react";
 import toast from "react-hot-toast";
 import { StaffFormDialog } from "@/components/StaffFormDialog";
 import { TeacherAssignmentsDialog } from "@/components/TeacherAssignmentsDialog";
@@ -22,6 +22,8 @@ export interface StaffRow {
   phone: string | null;
   is_active: boolean;
   role: StaffRole;
+  invite_status: "invited" | "active" | "expired";
+  invited_at: string | null;
   staff: {
     id: string;
     employee_id: string | null;
@@ -30,6 +32,17 @@ export interface StaffRow {
     date_of_joining: string | null;
     salary: number | null;
   } | null;
+}
+
+type InviteBadge = "active" | "invited" | "expired";
+
+function inviteState(r: StaffRow): InviteBadge {
+  if (r.invite_status === "active") return "active";
+  if (r.invited_at) {
+    const days = (Date.now() - new Date(r.invited_at).getTime()) / 86_400_000;
+    if (days > 7) return "expired";
+  }
+  return "invited";
 }
 
 function getInitials(name: string) {
@@ -69,7 +82,7 @@ export default function Staff() {
     const [{ data: profiles }, { data: staff }, { data: roles }] = await Promise.all([
       supabase
         .from("profiles")
-        .select("id, user_id, name, email, phone, is_active")
+        .select("id, user_id, name, email, phone, is_active, invite_status, invited_at")
         .eq("school_id", school.id)
         .order("name"),
       supabase
@@ -94,7 +107,7 @@ export default function Staff() {
     });
 
     const merged: StaffRow[] = (profiles ?? [])
-      .map((p) => {
+      .map((p: any) => {
         const userRole = roleMap.get(p.user_id);
         if (!userRole) return null; // skip parents/students
         return {
@@ -105,6 +118,8 @@ export default function Staff() {
           phone: p.phone,
           is_active: p.is_active ?? true,
           role: userRole,
+          invite_status: (p.invite_status ?? "active") as StaffRow["invite_status"],
+          invited_at: p.invited_at ?? null,
           staff: staffMap.get(p.user_id) ?? null,
         } as StaffRow;
       })
@@ -131,6 +146,53 @@ export default function Staff() {
 
   const teachingCount = rows.filter((r) => deptCategory(r.staff?.department ?? null) === "teaching").length;
   const nonTeachingCount = rows.length - teachingCount;
+  const pendingRows = rows.filter((r) => inviteState(r) !== "active");
+
+  const resendInvite = async (r: StaffRow) => {
+    if (!school?.id) return;
+    const { data, error } = await supabase.functions.invoke("invite-staff", {
+      body: {
+        name: r.name,
+        email: r.email,
+        phone: r.phone,
+        role: r.role,
+        school_id: school.id,
+        designation: r.staff?.designation ?? null,
+        department: r.staff?.department ?? null,
+        employee_id: r.staff?.employee_id ?? null,
+        date_of_joining: r.staff?.date_of_joining ?? null,
+        salary: r.staff?.salary ?? null,
+        resend: true,
+      },
+    });
+    const err = (data as any)?.error ?? error?.message;
+    if (err) toast.error(err);
+    else { toast.success(`Invite resent to ${r.email}`); load(); }
+  };
+
+  const inviteAllPending = async () => {
+    if (pendingRows.length === 0) { toast("No pending invites"); return; }
+    if (!confirm(`Resend invite to ${pendingRows.length} pending staff?`)) return;
+    let ok = 0, fail = 0;
+    for (const r of pendingRows) {
+      const { data, error } = await supabase.functions.invoke("invite-staff", {
+        body: {
+          name: r.name, email: r.email, phone: r.phone, role: r.role,
+          school_id: school!.id,
+          designation: r.staff?.designation ?? null,
+          department: r.staff?.department ?? null,
+          employee_id: r.staff?.employee_id ?? null,
+          date_of_joining: r.staff?.date_of_joining ?? null,
+          salary: r.staff?.salary ?? null,
+          resend: true,
+        },
+      });
+      if ((data as any)?.error || error) fail++; else ok++;
+    }
+    if (fail === 0) toast.success(`Resent ${ok} invites`);
+    else toast.error(`${ok} sent · ${fail} failed`);
+    load();
+  };
 
   const handleDelete = async (r: StaffRow) => {
     if (!confirm(`Deactivate ${r.name}? They will no longer appear in the active staff list.`)) return;
@@ -156,7 +218,16 @@ export default function Staff() {
           </p>
         </div>
         {canManage && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            {pendingRows.length > 0 && (
+              <Button
+                variant="outline"
+                className="rounded-xl h-10 border-warning/40 text-warning hover:bg-warning/10"
+                onClick={inviteAllPending}
+              >
+                <Send className="h-4 w-4 mr-1.5" /> Invite all pending ({pendingRows.length})
+              </Button>
+            )}
             <Button variant="outline" className="rounded-xl h-10" onClick={() => setImportOpen(true)}>
               <Upload className="h-4 w-4 mr-1.5" /> Import CSV
             </Button>
@@ -226,9 +297,23 @@ export default function Staff() {
                         </div>
                         <div className="min-w-0">
                           <div className="font-medium truncate">{r.name}</div>
-                          <span className={`inline-block mt-0.5 text-[10px] font-semibold px-2 py-0.5 rounded-full capitalize ${roleBadge(r.role)}`}>
-                            {r.role === "school_admin" ? "Admin" : "Teacher"}
-                          </span>
+                          <div className="flex items-center gap-1 mt-0.5 flex-wrap">
+                            <span className={`inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full capitalize ${roleBadge(r.role)}`}>
+                              {r.role === "school_admin" ? "Admin" : "Teacher"}
+                            </span>
+                            {(() => {
+                              const s = inviteState(r);
+                              if (s === "active") return null;
+                              const cls = s === "expired"
+                                ? "bg-destructive/10 text-destructive"
+                                : "bg-warning/15 text-warning";
+                              return (
+                                <span className={`inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full ${cls}`}>
+                                  {s === "expired" ? "Invite expired" : "Invited"}
+                                </span>
+                              );
+                            })()}
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -263,6 +348,16 @@ export default function Staff() {
                         )}
                         {canManage && (
                           <>
+                            {inviteState(r) !== "active" && r.email && (
+                              <button
+                                onClick={() => resendInvite(r)}
+                                className="p-1.5 rounded-lg text-warning hover:bg-warning/10 transition"
+                                title="Resend invite"
+                                aria-label={`Resend invite to ${r.name}`}
+                              >
+                                <Send className="h-3.5 w-3.5" />
+                              </button>
+                            )}
                             <button
                               onClick={() => { setEditStaff(r); setFormOpen(true); }}
                               className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition"

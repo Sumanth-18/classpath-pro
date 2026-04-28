@@ -231,7 +231,7 @@ export function StaffFormDialog({ open, onOpenChange, schoolId, existing, onSave
 
           {!isEdit && (
             <p className="text-[11px] text-muted-foreground">
-              Tip: a record will be created. The staff member can be invited to log in later.
+              An email invite will be sent so they can set up their password and sign in.
             </p>
           )}
 

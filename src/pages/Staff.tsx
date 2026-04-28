@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Plus, Search, Loader2, Pencil, Trash2, BookOpen, Upload, Mail, Phone } from "lucide-react";
+import { Plus, Search, Loader2, Pencil, Trash2, BookOpen, Upload, Mail, Phone, Send } from "lucide-react";
 import toast from "react-hot-toast";
 import { StaffFormDialog } from "@/components/StaffFormDialog";
 import { TeacherAssignmentsDialog } from "@/components/TeacherAssignmentsDialog";

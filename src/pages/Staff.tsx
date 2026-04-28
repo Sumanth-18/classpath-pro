@@ -297,9 +297,23 @@ export default function Staff() {
                         </div>
                         <div className="min-w-0">
                           <div className="font-medium truncate">{r.name}</div>
-                          <span className={`inline-block mt-0.5 text-[10px] font-semibold px-2 py-0.5 rounded-full capitalize ${roleBadge(r.role)}`}>
-                            {r.role === "school_admin" ? "Admin" : "Teacher"}
-                          </span>
+                          <div className="flex items-center gap-1 mt-0.5 flex-wrap">
+                            <span className={`inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full capitalize ${roleBadge(r.role)}`}>
+                              {r.role === "school_admin" ? "Admin" : "Teacher"}
+                            </span>
+                            {(() => {
+                              const s = inviteState(r);
+                              if (s === "active") return null;
+                              const cls = s === "expired"
+                                ? "bg-destructive/10 text-destructive"
+                                : "bg-warning/15 text-warning";
+                              return (
+                                <span className={`inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full ${cls}`}>
+                                  {s === "expired" ? "Invite expired" : "Invited"}
+                                </span>
+                              );
+                            })()}
+                          </div>
                         </div>
                       </div>
                     </td>

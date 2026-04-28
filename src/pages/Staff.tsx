@@ -107,7 +107,7 @@ export default function Staff() {
     });
 
     const merged: StaffRow[] = (profiles ?? [])
-      .map((p) => {
+      .map((p: any) => {
         const userRole = roleMap.get(p.user_id);
         if (!userRole) return null; // skip parents/students
         return {
@@ -118,6 +118,8 @@ export default function Staff() {
           phone: p.phone,
           is_active: p.is_active ?? true,
           role: userRole,
+          invite_status: (p.invite_status ?? "active") as StaffRow["invite_status"],
+          invited_at: p.invited_at ?? null,
           staff: staffMap.get(p.user_id) ?? null,
         } as StaffRow;
       })

@@ -146,6 +146,53 @@ export default function Staff() {
 
   const teachingCount = rows.filter((r) => deptCategory(r.staff?.department ?? null) === "teaching").length;
   const nonTeachingCount = rows.length - teachingCount;
+  const pendingRows = rows.filter((r) => inviteState(r) !== "active");
+
+  const resendInvite = async (r: StaffRow) => {
+    if (!school?.id) return;
+    const { data, error } = await supabase.functions.invoke("invite-staff", {
+      body: {
+        name: r.name,
+        email: r.email,
+        phone: r.phone,
+        role: r.role,
+        school_id: school.id,
+        designation: r.staff?.designation ?? null,
+        department: r.staff?.department ?? null,
+        employee_id: r.staff?.employee_id ?? null,
+        date_of_joining: r.staff?.date_of_joining ?? null,
+        salary: r.staff?.salary ?? null,
+        resend: true,
+      },
+    });
+    const err = (data as any)?.error ?? error?.message;
+    if (err) toast.error(err);
+    else { toast.success(`Invite resent to ${r.email}`); load(); }
+  };
+
+  const inviteAllPending = async () => {
+    if (pendingRows.length === 0) { toast("No pending invites"); return; }
+    if (!confirm(`Resend invite to ${pendingRows.length} pending staff?`)) return;
+    let ok = 0, fail = 0;
+    for (const r of pendingRows) {
+      const { data, error } = await supabase.functions.invoke("invite-staff", {
+        body: {
+          name: r.name, email: r.email, phone: r.phone, role: r.role,
+          school_id: school!.id,
+          designation: r.staff?.designation ?? null,
+          department: r.staff?.department ?? null,
+          employee_id: r.staff?.employee_id ?? null,
+          date_of_joining: r.staff?.date_of_joining ?? null,
+          salary: r.staff?.salary ?? null,
+          resend: true,
+        },
+      });
+      if ((data as any)?.error || error) fail++; else ok++;
+    }
+    if (fail === 0) toast.success(`Resent ${ok} invites`);
+    else toast.error(`${ok} sent · ${fail} failed`);
+    load();
+  };
 
   const handleDelete = async (r: StaffRow) => {
     if (!confirm(`Deactivate ${r.name}? They will no longer appear in the active staff list.`)) return;

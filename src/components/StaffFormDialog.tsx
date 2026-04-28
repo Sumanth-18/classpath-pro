@@ -146,45 +146,27 @@ export function StaffFormDialog({ open, onOpenChange, schoolId, existing, onSave
       return;
     }
 
-    // CREATE: a placeholder profile (no auth user yet — invite flow can come later)
-    const placeholderUserId = crypto.randomUUID();
-    const { data: newProfile, error: pErr } = await supabase
-      .from("profiles")
-      .insert({
-        user_id: placeholderUserId,
-        school_id: schoolId,
+    // CREATE: invite via secure edge function
+    const { data, error } = await supabase.functions.invoke("invite-staff", {
+      body: {
         name: name.trim(),
-        email: email.trim() || null,
+        email: email.trim(),
         phone: phone.trim() || null,
-      })
-      .select("id")
-      .single();
-    if (pErr || !newProfile) {
-      setSubmitting(false);
-      toast.error(pErr?.message ?? "Could not create staff");
-      return;
-    }
-
-    const { error: sErr } = await supabase
-      .from("staff_profiles")
-      .insert({ ...staffPayload, user_id: placeholderUserId });
-    if (sErr) {
-      setSubmitting(false);
-      toast.error(sErr.message);
-      return;
-    }
-
-    const { error: rErr } = await supabase
-      .from("user_roles")
-      .insert({ user_id: placeholderUserId, school_id: schoolId, role });
-    if (rErr) {
-      setSubmitting(false);
-      toast.error(rErr.message);
-      return;
-    }
-
+        role,
+        school_id: schoolId,
+        designation: designation.trim() || null,
+        department: department || null,
+        employee_id: employeeId.trim() || null,
+        date_of_joining: doj || null,
+        salary: salary ? Number(salary) : null,
+      },
+    });
     setSubmitting(false);
-    toast.success(`${name} added to staff`);
+    if (error || (data as any)?.error) {
+      toast.error((data as any)?.error ?? error?.message ?? "Could not invite staff");
+      return;
+    }
+    toast.success(`Invite sent to ${email.trim()}`);
     onSaved();
   };
 

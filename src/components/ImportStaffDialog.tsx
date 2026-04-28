@@ -68,13 +68,22 @@ export function ImportStaffDialog({ open, onOpenChange, schoolId, onImported }: 
   const handleFile = async (file: File) => {
     setFileName(file.name);
 
-    // Pre-fetch existing emails in this school for duplicate detection
+    // Pre-fetch existing emails + employee IDs in this school for duplicate detection
     const { data: existing } = await supabase
       .from("profiles")
       .select("email")
       .eq("school_id", schoolId);
     const existingEmails = new Set(
       (existing ?? []).map((p: any) => (p.email ?? "").toLowerCase()).filter(Boolean)
+    );
+    const { data: existingStaff } = await supabase
+      .from("staff_profiles")
+      .select("employee_id")
+      .eq("school_id", schoolId);
+    const existingEmpIds = new Set(
+      (existingStaff ?? [])
+        .map((s: any) => (s.employee_id ?? "").toLowerCase())
+        .filter(Boolean)
     );
 
     Papa.parse<Record<string, string>>(file, {

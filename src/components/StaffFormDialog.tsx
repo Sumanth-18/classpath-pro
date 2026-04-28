@@ -74,6 +74,25 @@ export function StaffFormDialog({ open, onOpenChange, schoolId, existing, onSave
 
     setSubmitting(true);
 
+    // Case-insensitive employee_id duplicate check within school
+    if (employeeId.trim()) {
+      const empIdLower = employeeId.trim().toLowerCase();
+      const { data: dupes } = await supabase
+        .from("staff_profiles")
+        .select("id, employee_id")
+        .eq("school_id", schoolId);
+      const conflict = (dupes ?? []).find(
+        (d: any) =>
+          (d.employee_id ?? "").toLowerCase() === empIdLower &&
+          (!isEdit || d.id !== existing?.staff?.id)
+      );
+      if (conflict) {
+        setSubmitting(false);
+        toast.error(`Employee ID "${employeeId.trim()}" already exists`);
+        return;
+      }
+    }
+
     const staffPayload = {
       school_id: schoolId,
       designation: designation.trim() || null,

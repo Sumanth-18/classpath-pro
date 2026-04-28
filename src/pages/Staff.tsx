@@ -218,7 +218,16 @@ export default function Staff() {
           </p>
         </div>
         {canManage && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            {pendingRows.length > 0 && (
+              <Button
+                variant="outline"
+                className="rounded-xl h-10 border-warning/40 text-warning hover:bg-warning/10"
+                onClick={inviteAllPending}
+              >
+                <Send className="h-4 w-4 mr-1.5" /> Invite all pending ({pendingRows.length})
+              </Button>
+            )}
             <Button variant="outline" className="rounded-xl h-10" onClick={() => setImportOpen(true)}>
               <Upload className="h-4 w-4 mr-1.5" /> Import CSV
             </Button>

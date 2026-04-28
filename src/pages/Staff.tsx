@@ -82,7 +82,7 @@ export default function Staff() {
     const [{ data: profiles }, { data: staff }, { data: roles }] = await Promise.all([
       supabase
         .from("profiles")
-        .select("id, user_id, name, email, phone, is_active")
+        .select("id, user_id, name, email, phone, is_active, invite_status, invited_at")
         .eq("school_id", school.id)
         .order("name"),
       supabase

@@ -348,6 +348,16 @@ export default function Staff() {
                         )}
                         {canManage && (
                           <>
+                            {inviteState(r) !== "active" && r.email && (
+                              <button
+                                onClick={() => resendInvite(r)}
+                                className="p-1.5 rounded-lg text-warning hover:bg-warning/10 transition"
+                                title="Resend invite"
+                                aria-label={`Resend invite to ${r.name}`}
+                              >
+                                <Send className="h-3.5 w-3.5" />
+                              </button>
+                            )}
                             <button
                               onClick={() => { setEditStaff(r); setFormOpen(true); }}
                               className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition"

@@ -140,57 +140,39 @@ export function ImportStaffDialog({ open, onOpenChange, schoolId, onImported }: 
     if (valid.length === 0) { toast.error("No valid rows to import"); return; }
     setSubmitting(true);
 
-    // Build profile + staff_profiles + user_roles inserts
-    const profileInserts = valid.map((r) => ({
-      user_id: crypto.randomUUID(),
-      school_id: schoolId,
-      name: r.name,
-      email: r.email,
-      phone: r.phone || null,
-    }));
+    let successes = 0;
+    const failures: { email: string; reason: string }[] = [];
 
-    const { data: createdProfiles, error: pErr } = await supabase
-      .from("profiles")
-      .insert(profileInserts)
-      .select("user_id, email");
-    if (pErr || !createdProfiles) {
-      setSubmitting(false);
-      toast.error(pErr?.message ?? "Could not create staff profiles");
-      return;
+    // Sequential to avoid hammering auth admin API
+    for (const r of valid) {
+      const { data, error } = await supabase.functions.invoke("invite-staff", {
+        body: {
+          name: r.name,
+          email: r.email,
+          phone: r.phone || null,
+          role: r.role,
+          school_id: schoolId,
+          designation: r.designation || null,
+          department: r.department || null,
+          employee_id: r.employee_id || null,
+          date_of_joining: r.date_of_joining,
+          salary: r.salary,
+        },
+      });
+      const err = (data as any)?.error ?? error?.message;
+      if (err) failures.push({ email: r.email, reason: err });
+      else successes++;
     }
-
-    const userIdByEmail = new Map<string, string>();
-    createdProfiles.forEach((p: any) => userIdByEmail.set((p.email ?? "").toLowerCase(), p.user_id));
-
-    const staffInserts = valid.map((r) => ({
-      school_id: schoolId,
-      user_id: userIdByEmail.get(r.email)!,
-      employee_id: r.employee_id || null,
-      designation: r.designation || null,
-      department: r.department || null,
-      date_of_joining: r.date_of_joining,
-      salary: r.salary,
-    }));
-    const roleInserts = valid.map((r) => ({
-      user_id: userIdByEmail.get(r.email)!,
-      school_id: schoolId,
-      role: r.role,
-    }));
-
-    const [{ error: sErr }, { error: rErr }] = await Promise.all([
-      supabase.from("staff_profiles").insert(staffInserts),
-      supabase.from("user_roles").insert(roleInserts),
-    ]);
 
     setSubmitting(false);
-    if (sErr || rErr) {
-      toast.error(sErr?.message ?? rErr?.message ?? "Partial import failed");
-      onImported();
-      return;
+    if (failures.length === 0) {
+      toast.success(`Invited ${successes} staff member${successes === 1 ? "" : "s"}!`);
+      reset();
+      onOpenChange(false);
+    } else {
+      toast.error(`${successes} invited · ${failures.length} failed`);
+      console.warn("Import failures:", failures);
     }
-    toast.success(`Imported ${valid.length} staff member${valid.length === 1 ? "" : "s"}!`);
-    reset();
-    onOpenChange(false);
     onImported();
   };
 

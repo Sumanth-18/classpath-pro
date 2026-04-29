@@ -28,7 +28,7 @@ interface Props {
 
 export function RecordPaymentDialog({ open, onOpenChange, schoolId, student, onSaved }: Props) {
   const [amount, setAmount] = useState("");
-  const [mode, setMode] = useState<"cash" | "upi" | "cheque" | "card" | "bank_transfer">("cash");
+  const [mode, setMode] = useState<"cash" | "upi" | "cheque" | "card" | "online">("cash");
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -59,7 +59,7 @@ export function RecordPaymentDialog({ open, onOpenChange, schoolId, student, onS
           receipt_number: receiptNumber,
           note: note.trim() || null,
           status: "paid",
-        })
+        } as any)
         .select("id").single();
       if (error) throw error;
 
@@ -99,7 +99,7 @@ export function RecordPaymentDialog({ open, onOpenChange, schoolId, student, onS
                 <SelectItem value="upi">UPI</SelectItem>
                 <SelectItem value="cheque">Cheque</SelectItem>
                 <SelectItem value="card">Card</SelectItem>
-                <SelectItem value="bank_transfer">Bank transfer</SelectItem>
+                <SelectItem value="online">Online / Bank transfer</SelectItem>
               </SelectContent>
             </Select>
           </div>

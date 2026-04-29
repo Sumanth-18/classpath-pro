@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import { Loader2, Flag } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
+const sb: any = supabase;
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";

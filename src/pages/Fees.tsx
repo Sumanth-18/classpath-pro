@@ -11,6 +11,9 @@ import {
 
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+// Some new tables/columns are not yet in the auto-generated types; use a loose alias
+// for those targeted queries without losing type safety on existing tables.
+const sb: any = supabase;
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";

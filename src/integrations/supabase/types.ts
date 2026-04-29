@@ -146,6 +146,7 @@ export type Database = {
           date: string
           id: string
           marked_by: string | null
+          notes: string | null
           remarks: string | null
           school_id: string
           section_id: string | null
@@ -157,6 +158,7 @@ export type Database = {
           date: string
           id?: string
           marked_by?: string | null
+          notes?: string | null
           remarks?: string | null
           school_id: string
           section_id?: string | null
@@ -168,6 +170,7 @@ export type Database = {
           date?: string
           id?: string
           marked_by?: string | null
+          notes?: string | null
           remarks?: string | null
           school_id?: string
           section_id?: string | null
@@ -204,6 +207,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      attendance_audit: {
+        Row: {
+          action: string
+          attendance_id: string | null
+          created_at: string
+          date: string | null
+          id: string
+          new_status: string | null
+          old_status: string | null
+          payload: Json | null
+          performed_by: string
+          reason: string | null
+          school_id: string
+          student_id: string | null
+        }
+        Insert: {
+          action: string
+          attendance_id?: string | null
+          created_at?: string
+          date?: string | null
+          id?: string
+          new_status?: string | null
+          old_status?: string | null
+          payload?: Json | null
+          performed_by: string
+          reason?: string | null
+          school_id: string
+          student_id?: string | null
+        }
+        Update: {
+          action?: string
+          attendance_id?: string | null
+          created_at?: string
+          date?: string | null
+          id?: string
+          new_status?: string | null
+          old_status?: string | null
+          payload?: Json | null
+          performed_by?: string
+          reason?: string | null
+          school_id?: string
+          student_id?: string | null
+        }
+        Relationships: []
       }
       classes: {
         Row: {
@@ -1030,6 +1078,7 @@ export type Database = {
           id: string
           is_active: boolean | null
           name: string
+          parent_phone: string | null
           photo_url: string | null
           school_id: string
           section_id: string | null
@@ -1042,6 +1091,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           name: string
+          parent_phone?: string | null
           photo_url?: string | null
           school_id: string
           section_id?: string | null
@@ -1054,6 +1104,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           name?: string
+          parent_phone?: string | null
           photo_url?: string | null
           school_id?: string
           section_id?: string | null
@@ -1302,7 +1353,7 @@ export type Database = {
       announcement_type: "general" | "event" | "holiday" | "urgent"
       app_role: "school_admin" | "teacher" | "parent" | "student"
       assignment_type: "homework" | "classwork" | "reading" | "project"
-      attendance_status: "present" | "absent" | "late"
+      attendance_status: "present" | "absent" | "late" | "leave_approved"
       audience_type: "everyone" | "parents" | "teachers" | "students"
       event_type: "holiday" | "event" | "exam" | "meeting"
       fee_status: "paid" | "due" | "overdue" | "partial"
@@ -1441,7 +1492,7 @@ export const Constants = {
       announcement_type: ["general", "event", "holiday", "urgent"],
       app_role: ["school_admin", "teacher", "parent", "student"],
       assignment_type: ["homework", "classwork", "reading", "project"],
-      attendance_status: ["present", "absent", "late"],
+      attendance_status: ["present", "absent", "late", "leave_approved"],
       audience_type: ["everyone", "parents", "teachers", "students"],
       event_type: ["holiday", "event", "exam", "meeting"],
       fee_status: ["paid", "due", "overdue", "partial"],

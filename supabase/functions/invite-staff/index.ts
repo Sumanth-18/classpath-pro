@@ -151,6 +151,23 @@ Deno.serve(async (req) => {
       invited = true;
     }
 
+    // Case-insensitive employee_id duplicate check (exclude this user's own row)
+    if (employee_id?.trim()) {
+      const empLower = employee_id.trim().toLowerCase();
+      const { data: dupes } = await admin
+        .from("staff_profiles")
+        .select("id, employee_id, user_id")
+        .eq("school_id", school_id);
+      const conflict = (dupes ?? []).find(
+        (d: any) =>
+          (d.employee_id ?? "").toLowerCase() === empLower &&
+          d.user_id !== userId,
+      );
+      if (conflict) {
+        return json({ error: `Employee ID "${employee_id}" already exists` }, 409);
+      }
+    }
+
     // The handle_new_user trigger creates profile + user_role rows.
     // Update profile with extra fields and mark as invited.
     await admin

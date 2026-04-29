@@ -28,7 +28,7 @@ export function FlagFollowupDialog({ open, onOpenChange, schoolId, studentId, st
   const submit = async () => {
     if (note.trim().length < 3) { toast.error("Add a short note"); return; }
     setSaving(true);
-    const { error } = await supabase.from("fee_flags").insert({
+    const { error } = await sb.from("fee_flags").insert({
       school_id: schoolId,
       student_id: studentId,
       raised_by: raisedBy,

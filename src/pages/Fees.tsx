@@ -162,8 +162,8 @@ function StructuresTab({ schoolId }: { schoolId: string }) {
     ] = await Promise.all([
       supabase.from("classes").select("id, name").eq("school_id", schoolId).order("name"),
       supabase.from("fee_structures").select("id, name, amount, frequency, academic_year, due_day").eq("school_id", schoolId).order("created_at", { ascending: false }),
-      supabase.from("fee_structure_classes").select("fee_structure_id, class_id, classes!inner(id, name)").eq("school_id", schoolId),
-      supabase.from("fee_instalments").select("id, fee_structure_id, label, amount, due_date, sort_order").eq("school_id", schoolId).order("sort_order"),
+      sb.from("fee_structure_classes").select("fee_structure_id, class_id, classes!inner(id, name)").eq("school_id", schoolId),
+      sb.from("fee_instalments").select("id, fee_structure_id, label, amount, due_date, sort_order").eq("school_id", schoolId).order("sort_order"),
     ]);
     setClasses((cls ?? []) as ClassRow[]);
     const linksByStruct: Record<string, { id: string; name: string }[]> = {};
@@ -189,8 +189,8 @@ function StructuresTab({ schoolId }: { schoolId: string }) {
 
   const remove = async (id: string) => {
     if (!confirm("Delete this fee category? Linked classes and instalments will also be removed.")) return;
-    await supabase.from("fee_instalments").delete().eq("fee_structure_id", id);
-    await supabase.from("fee_structure_classes").delete().eq("fee_structure_id", id);
+    await sb.from("fee_instalments").delete().eq("fee_structure_id", id);
+    await sb.from("fee_structure_classes").delete().eq("fee_structure_id", id);
     const { error } = await supabase.from("fee_structures").delete().eq("id", id);
     if (error) { toast.error(error.message); return; }
     toast.success("Deleted");
@@ -319,7 +319,7 @@ function DuesTab({
           ? supabase.from("fee_payments").select("student_id, amount_paid, fee_structure_id").eq("school_id", schoolId).in("student_id", studentIds)
           : Promise.resolve({ data: [] as any[] }),
         supabase.from("fee_structures").select("id, amount, class_id").eq("school_id", schoolId),
-        supabase.from("fee_structure_classes").select("fee_structure_id, class_id").eq("school_id", schoolId),
+        sb.from("fee_structure_classes").select("fee_structure_id, class_id").eq("school_id", schoolId),
       ]);
 
       const structAmt = new Map<string, number>();

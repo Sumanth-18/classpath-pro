@@ -76,18 +76,18 @@ export function FeeStructureDialog({ open, onOpenChange, schoolId, classes, exis
       }
 
       // reset class links
-      await supabase.from("fee_structure_classes").delete().eq("fee_structure_id", structureId!);
+      await sb.from("fee_structure_classes").delete().eq("fee_structure_id", structureId!);
       if (classIds.length > 0) {
-        await supabase.from("fee_structure_classes").insert(
+        await sb.from("fee_structure_classes").insert(
           classIds.map((cid) => ({ fee_structure_id: structureId, class_id: cid, school_id: schoolId })),
         );
       }
 
       // reset instalments
-      await supabase.from("fee_instalments").delete().eq("fee_structure_id", structureId!);
+      await sb.from("fee_instalments").delete().eq("fee_structure_id", structureId!);
       const cleanIns = instalments.filter((i) => i.label.trim() && Number(i.amount) > 0);
       if (cleanIns.length > 0) {
-        await supabase.from("fee_instalments").insert(
+        await sb.from("fee_instalments").insert(
           cleanIns.map((i, idx) => ({
             fee_structure_id: structureId,
             school_id: schoolId,

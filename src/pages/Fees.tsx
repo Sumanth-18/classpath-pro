@@ -829,7 +829,7 @@ function ParentFeesView() {
     (async () => {
       const [{ data: dues }, { data: pays }] = await Promise.all([
         supabase.from("fee_dues").select("amount_due, due_date, is_paid").eq("student_id", activeId),
-        supabase.from("fee_payments").select("id, amount_paid, payment_date, payment_mode, receipt_number, receipt_url").eq("student_id", activeId).order("payment_date", { ascending: false }),
+        sb.from("fee_payments").select("id, amount_paid, payment_date, payment_mode, receipt_number, receipt_url").eq("student_id", activeId).order("payment_date", { ascending: false }),
       ]);
       const total = (dues ?? []).reduce((s: number, d: any) => s + Number(d.amount_due), 0);
       const paid = (pays ?? []).reduce((s: number, p: any) => s + Number(p.amount_paid), 0);

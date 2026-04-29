@@ -15,6 +15,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Students from "./pages/Students";
 import Staff from "./pages/Staff";
+import Attendance from "./pages/Attendance";
 import ComingSoon from "./pages/ComingSoon";
 import NotFound from "./pages/NotFound";
 
@@ -55,7 +56,11 @@ const App = () => (
                 <AppShell><Students /></AppShell>
               </ProtectedRoute>
             } />
-            <Route path="/attendance" element={<Shell><ComingSoon title="Attendance" description="Mark daily student attendance" /></Shell>} />
+            <Route path="/attendance" element={
+              <ProtectedRoute allow={["school_admin", "teacher"]}>
+                <AppShell><Attendance /></AppShell>
+              </ProtectedRoute>
+            } />
             <Route path="/grades" element={<Shell><ComingSoon title="Grade Book" description="Enter and manage student marks" /></Shell>} />
             <Route path="/fees" element={<Shell><ComingSoon title="Fees" description="Track collections and dues" /></Shell>} />
             <Route path="/assignments" element={<Shell><ComingSoon title="Assignments" description="Create and track assignments" /></Shell>} />

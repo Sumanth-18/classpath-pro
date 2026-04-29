@@ -91,21 +91,6 @@ Deno.serve(async (req) => {
       return json({ error: "Not a school admin of this school" }, 403);
     }
 
-    // Case-insensitive employee_id duplicate check
-    if (employee_id?.trim()) {
-      const { data: dupes } = await admin
-        .from("staff_profiles")
-        .select("id, employee_id")
-        .eq("school_id", school_id);
-      const empLower = employee_id.trim().toLowerCase();
-      const conflict = (dupes ?? []).find(
-        (d: any) => (d.employee_id ?? "").toLowerCase() === empLower,
-      );
-      if (conflict) {
-        return json({ error: `Employee ID "${employee_id}" already exists` }, 409);
-      }
-    }
-
     const emailNorm = email.trim().toLowerCase();
 
     // Check if user already exists
@@ -164,6 +149,23 @@ Deno.serve(async (req) => {
       }
       userId = invite.user.id;
       invited = true;
+    }
+
+    // Case-insensitive employee_id duplicate check (exclude this user's own row)
+    if (employee_id?.trim()) {
+      const empLower = employee_id.trim().toLowerCase();
+      const { data: dupes } = await admin
+        .from("staff_profiles")
+        .select("id, employee_id, user_id")
+        .eq("school_id", school_id);
+      const conflict = (dupes ?? []).find(
+        (d: any) =>
+          (d.employee_id ?? "").toLowerCase() === empLower &&
+          d.user_id !== userId,
+      );
+      if (conflict) {
+        return json({ error: `Employee ID "${employee_id}" already exists` }, 409);
+      }
     }
 
     // The handle_new_user trigger creates profile + user_role rows.

@@ -516,7 +516,7 @@ function HistoryTab({ schoolId }: { schoolId: string }) {
 
   const load = async () => {
     setLoading(true);
-    const { data } = await supabase
+    const { data } = await sb
       .from("fee_payments")
       .select("id, student_id, amount_paid, payment_date, payment_mode, receipt_number, receipt_url, students!inner(name)")
       .eq("school_id", schoolId)

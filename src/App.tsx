@@ -16,6 +16,7 @@ import Dashboard from "./pages/Dashboard";
 import Students from "./pages/Students";
 import Staff from "./pages/Staff";
 import Attendance from "./pages/Attendance";
+import Fees from "./pages/Fees";
 import ComingSoon from "./pages/ComingSoon";
 import NotFound from "./pages/NotFound";
 

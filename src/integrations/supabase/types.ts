@@ -400,6 +400,75 @@ export type Database = {
           },
         ]
       }
+      fee_flags: {
+        Row: {
+          created_at: string
+          id: string
+          note: string | null
+          raised_by: string
+          resolved_at: string | null
+          resolved_by: string | null
+          school_id: string
+          status: string
+          student_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          raised_by: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          school_id: string
+          status?: string
+          student_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          raised_by?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          school_id?: string
+          status?: string
+          student_id?: string
+        }
+        Relationships: []
+      }
+      fee_instalments: {
+        Row: {
+          amount: number
+          created_at: string
+          due_date: string | null
+          fee_structure_id: string
+          id: string
+          label: string
+          school_id: string
+          sort_order: number
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          due_date?: string | null
+          fee_structure_id: string
+          id?: string
+          label: string
+          school_id: string
+          sort_order?: number
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          due_date?: string | null
+          fee_structure_id?: string
+          id?: string
+          label?: string
+          school_id?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
       fee_payments: {
         Row: {
           amount_paid: number
@@ -408,9 +477,11 @@ export type Database = {
           fee_structure_id: string | null
           for_month: string | null
           id: string
+          note: string | null
           payment_date: string | null
           payment_mode: Database["public"]["Enums"]["payment_mode"] | null
           receipt_number: string | null
+          receipt_url: string | null
           school_id: string
           status: Database["public"]["Enums"]["fee_status"] | null
           student_id: string
@@ -422,9 +493,11 @@ export type Database = {
           fee_structure_id?: string | null
           for_month?: string | null
           id?: string
+          note?: string | null
           payment_date?: string | null
           payment_mode?: Database["public"]["Enums"]["payment_mode"] | null
           receipt_number?: string | null
+          receipt_url?: string | null
           school_id: string
           status?: Database["public"]["Enums"]["fee_status"] | null
           student_id: string
@@ -436,9 +509,11 @@ export type Database = {
           fee_structure_id?: string | null
           for_month?: string | null
           id?: string
+          note?: string | null
           payment_date?: string | null
           payment_mode?: Database["public"]["Enums"]["payment_mode"] | null
           receipt_number?: string | null
+          receipt_url?: string | null
           school_id?: string
           status?: Database["public"]["Enums"]["fee_status"] | null
           student_id?: string
@@ -473,6 +548,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      fee_structure_classes: {
+        Row: {
+          class_id: string
+          created_at: string
+          fee_structure_id: string
+          id: string
+          school_id: string
+        }
+        Insert: {
+          class_id: string
+          created_at?: string
+          fee_structure_id: string
+          id?: string
+          school_id: string
+        }
+        Update: {
+          class_id?: string
+          created_at?: string
+          fee_structure_id?: string
+          id?: string
+          school_id?: string
+        }
+        Relationships: []
       }
       fee_structures: {
         Row: {

@@ -48,7 +48,57 @@ export function StaffFormDialog({ open, onOpenChange, schoolId, existing, onSave
   const [salary, setSalary] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  // Class teacher assignment
+  type SectionOpt = {
+    section_id: string;
+    label: string;
+    current_teacher_id: string | null;
+    current_teacher_name: string | null;
+  };
+  const [sections, setSections] = useState<SectionOpt[]>([]);
+  const [classTeacherSection, setClassTeacherSection] = useState<string>("none");
+  const [originalSection, setOriginalSection] = useState<string>("none");
+
+  // Load sections + their current class teachers (by profile.id)
   useEffect(() => {
+    if (!open || !schoolId) return;
+    (async () => {
+      const { data: secs } = await supabase
+        .from("sections")
+        .select("id, name, class_teacher_id, classes!inner(name)")
+        .eq("school_id", schoolId)
+        .order("name");
+      const teacherIds = Array.from(
+        new Set((secs ?? []).map((s: any) => s.class_teacher_id).filter(Boolean) as string[])
+      );
+      const profileMap = new Map<string, string>();
+      if (teacherIds.length) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("id, name")
+          .in("id", teacherIds);
+        (profs ?? []).forEach((p: any) => profileMap.set(p.id, p.name));
+      }
+      const opts: SectionOpt[] = (secs ?? []).map((s: any) => ({
+        section_id: s.id,
+        label: `${s.classes?.name ?? "Class"} ${s.name}`,
+        current_teacher_id: s.class_teacher_id ?? null,
+        current_teacher_name: s.class_teacher_id ? (profileMap.get(s.class_teacher_id) ?? "Unknown") : null,
+      }));
+      setSections(opts);
+
+      // Determine current assignment for the staff being edited
+      if (isEdit && existing?.profile_id) {
+        const mine = opts.find((o) => o.current_teacher_id === existing.profile_id);
+        const sid = mine?.section_id ?? "none";
+        setClassTeacherSection(sid);
+        setOriginalSection(sid);
+      } else {
+        setClassTeacherSection("none");
+        setOriginalSection("none");
+      }
+    })();
+  }, [open, schoolId, isEdit, existing?.profile_id]);
     if (existing) {
       setName(existing.name);
       setEmail(existing.email ?? "");

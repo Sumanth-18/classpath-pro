@@ -298,6 +298,7 @@ export default function Staff() {
                   <th className="px-5 py-3 font-semibold">Member</th>
                   <th className="px-5 py-3 font-semibold">Designation</th>
                   <th className="px-5 py-3 font-semibold">Department</th>
+                  <th className="px-5 py-3 font-semibold">Class</th>
                   <th className="px-5 py-3 font-semibold">Emp. ID</th>
                   <th className="px-5 py-3 font-semibold">Contact</th>
                   <th className="px-5 py-3 font-semibold text-right">Actions</th>

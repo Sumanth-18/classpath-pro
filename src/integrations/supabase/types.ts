@@ -450,6 +450,7 @@ export type Database = {
       fee_flags: {
         Row: {
           created_at: string
+          flagged_by: string | null
           id: string
           note: string | null
           raised_by: string
@@ -461,6 +462,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          flagged_by?: string | null
           id?: string
           note?: string | null
           raised_by: string
@@ -472,6 +474,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          flagged_by?: string | null
           id?: string
           note?: string | null
           raised_by?: string
@@ -481,7 +484,15 @@ export type Database = {
           status?: string
           student_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fee_flags_flagged_by_fkey"
+            columns: ["flagged_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       fee_instalments: {
         Row: {
@@ -490,6 +501,7 @@ export type Database = {
           due_date: string | null
           fee_structure_id: string
           id: string
+          instalment_number: number | null
           label: string
           school_id: string
           sort_order: number
@@ -500,6 +512,7 @@ export type Database = {
           due_date?: string | null
           fee_structure_id: string
           id?: string
+          instalment_number?: number | null
           label: string
           school_id: string
           sort_order?: number
@@ -510,6 +523,7 @@ export type Database = {
           due_date?: string | null
           fee_structure_id?: string
           id?: string
+          instalment_number?: number | null
           label?: string
           school_id?: string
           sort_order?: number

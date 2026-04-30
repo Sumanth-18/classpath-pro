@@ -108,7 +108,7 @@ export default function Attendance() {
     (async () => {
       let q = supabase
         .from("sections")
-        .select("id, name, class_id, classes!inner(name)")
+        .select("id, name, class_id, class_teacher_id, classes!inner(name)")
         .eq("school_id", school.id);
 
       if (!isAdmin) {
@@ -124,11 +124,29 @@ export default function Attendance() {
 
       const { data, error } = await q.order("name", { ascending: true });
       if (error) { toast.error("Could not load classes"); return; }
-      const opts: SectionOpt[] = (data ?? []).map((s: any) => ({
-        id: s.id,
-        class_id: s.class_id,
-        label: `${s.classes?.name ?? "Class"} - ${s.name}`,
-      }));
+
+      // Resolve class teacher names
+      const teacherIds = Array.from(
+        new Set((data ?? []).map((s: any) => s.class_teacher_id).filter(Boolean) as string[])
+      );
+      const nameMap = new Map<string, string>();
+      if (teacherIds.length) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("id, name")
+          .in("id", teacherIds);
+        (profs ?? []).forEach((p: any) => nameMap.set(p.id, p.name));
+      }
+
+      const opts: SectionOpt[] = (data ?? []).map((s: any) => {
+        const base = `${s.classes?.name ?? "Class"} - ${s.name}`;
+        const tname = s.class_teacher_id ? nameMap.get(s.class_teacher_id) : null;
+        return {
+          id: s.id,
+          class_id: s.class_id,
+          label: tname ? `${base} — ${tname}` : base,
+        };
+      });
       setSections(opts);
       if (opts.length && !sectionId) setSectionId(opts[0].id);
     })();

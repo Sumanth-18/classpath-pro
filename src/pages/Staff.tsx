@@ -80,7 +80,7 @@ export default function Staff() {
   const load = async () => {
     if (!school?.id) return;
     setLoading(true);
-    const [{ data: profiles }, { data: staff }, { data: roles }] = await Promise.all([
+    const [{ data: profiles }, { data: staff }, { data: roles }, { data: secs }] = await Promise.all([
       supabase
         .from("profiles")
         .select("id, user_id, name, email, phone, is_active, invite_status, invited_at")
@@ -94,6 +94,10 @@ export default function Staff() {
         .from("user_roles")
         .select("user_id, role")
         .eq("school_id", school.id),
+      supabase
+        .from("sections")
+        .select("id, name, class_teacher_id, classes!inner(name)")
+        .eq("school_id", school.id),
     ]);
 
     const staffMap = new Map<string, NonNullable<StaffRow["staff"]>>();
@@ -104,6 +108,16 @@ export default function Staff() {
         // school_admin wins over teacher
         if (roleMap.get(r.user_id) === "school_admin") return;
         roleMap.set(r.user_id, r.role);
+      }
+    });
+    // profile.id -> { section_id, label }
+    const ctMap = new Map<string, { section_id: string; label: string }>();
+    (secs ?? []).forEach((s: any) => {
+      if (s.class_teacher_id) {
+        ctMap.set(s.class_teacher_id, {
+          section_id: s.id,
+          label: `${s.classes?.name ?? "Class"} ${s.name}`,
+        });
       }
     });
 
@@ -122,6 +136,7 @@ export default function Staff() {
           invite_status: (p.invite_status ?? "active") as StaffRow["invite_status"],
           invited_at: p.invited_at ?? null,
           staff: staffMap.get(p.user_id) ?? null,
+          class_teacher_of: ctMap.get(p.id) ?? null,
         } as StaffRow;
       })
       .filter((x): x is StaffRow => x !== null);

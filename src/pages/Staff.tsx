@@ -336,6 +336,17 @@ export default function Staff() {
                     </td>
                     <td className="px-5 py-3 text-foreground">{r.staff?.designation ?? "—"}</td>
                     <td className="px-5 py-3 text-muted-foreground">{r.staff?.department ?? "—"}</td>
+                    <td className="px-5 py-3">
+                      {r.class_teacher_of ? (
+                        <span className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full bg-success-soft text-success">
+                          {r.class_teacher_of.label}
+                        </span>
+                      ) : (
+                        <span className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                          No class
+                        </span>
+                      )}
+                    </td>
                     <td className="px-5 py-3 font-mono text-xs text-muted-foreground">{r.staff?.employee_id ?? "—"}</td>
                     <td className="px-5 py-3 text-xs">
                       <div className="space-y-0.5">

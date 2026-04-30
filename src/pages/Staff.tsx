@@ -32,6 +32,7 @@ export interface StaffRow {
     date_of_joining: string | null;
     salary: number | null;
   } | null;
+  class_teacher_of: { section_id: string; label: string } | null;
 }
 
 type InviteBadge = "active" | "invited" | "expired";

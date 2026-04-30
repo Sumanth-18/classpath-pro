@@ -312,6 +312,54 @@ export function StaffFormDialog({ open, onOpenChange, schoolId, existing, onSave
             </div>
           </div>
 
+          {isEdit && role === "teacher" && (
+            <div className="space-y-1.5 pt-1">
+              <Label>Assign as Class Teacher</Label>
+              <Select
+                value={classTeacherSection}
+                onValueChange={(v) => {
+                  if (v === "none") {
+                    if (originalSection !== "none") {
+                      if (!confirm("Remove class assignment for this teacher?")) return;
+                    }
+                    setClassTeacherSection("none");
+                    return;
+                  }
+                  const opt = sections.find((s) => s.section_id === v);
+                  if (
+                    opt?.current_teacher_id &&
+                    opt.current_teacher_id !== existing?.profile_id
+                  ) {
+                    if (!confirm(`${opt.label} is already assigned to ${opt.current_teacher_name}. Reassign?`)) return;
+                  }
+                  setClassTeacherSection(v);
+                }}
+              >
+                <SelectTrigger className="rounded-xl h-11">
+                  <SelectValue placeholder="Select a class" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">— No class assignment —</SelectItem>
+                  {sections.map((s) => {
+                    const suffix = s.current_teacher_id
+                      ? s.current_teacher_id === existing?.profile_id
+                        ? " (current)"
+                        : ` (${s.current_teacher_name})`
+                      : " (unassigned)";
+                    return (
+                      <SelectItem key={s.section_id} value={s.section_id}>
+                        {s.label}{suffix}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+              <p className="text-[11px] text-muted-foreground">
+                A teacher can only be class teacher of one class. Reassigning will free their previous class.
+              </p>
+            </div>
+          )}
+
           {!isEdit && (
             <p className="text-[11px] text-muted-foreground">
               An email invite will be sent so they can set up their password and sign in.

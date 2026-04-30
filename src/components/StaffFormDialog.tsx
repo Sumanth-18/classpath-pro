@@ -213,6 +213,16 @@ export function StaffFormDialog({ open, onOpenChange, schoolId, existing, onSave
         if (rErr) { setSubmitting(false); toast.error(rErr.message); return; }
       }
 
+      // Class teacher assignment (single class per teacher)
+      if (role === "teacher") {
+        const ctErr = await applyClassTeacherAssignment(existing.profile_id);
+        if (ctErr) { setSubmitting(false); toast.error(ctErr); return; }
+      } else if (originalSection !== "none") {
+        // Promoted to admin: clear any existing class-teacher slot
+        await supabase.from("sections").update({ class_teacher_id: null })
+          .eq("school_id", schoolId).eq("class_teacher_id", existing.profile_id);
+      }
+
       setSubmitting(false);
       toast.success("Staff updated");
       onSaved();

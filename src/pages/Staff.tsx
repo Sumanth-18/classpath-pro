@@ -32,6 +32,7 @@ export interface StaffRow {
     date_of_joining: string | null;
     salary: number | null;
   } | null;
+  class_teacher_of: { section_id: string; label: string } | null;
 }
 
 type InviteBadge = "active" | "invited" | "expired";
@@ -79,7 +80,7 @@ export default function Staff() {
   const load = async () => {
     if (!school?.id) return;
     setLoading(true);
-    const [{ data: profiles }, { data: staff }, { data: roles }] = await Promise.all([
+    const [{ data: profiles }, { data: staff }, { data: roles }, { data: secs }] = await Promise.all([
       supabase
         .from("profiles")
         .select("id, user_id, name, email, phone, is_active, invite_status, invited_at")
@@ -93,6 +94,10 @@ export default function Staff() {
         .from("user_roles")
         .select("user_id, role")
         .eq("school_id", school.id),
+      supabase
+        .from("sections")
+        .select("id, name, class_teacher_id, classes!inner(name)")
+        .eq("school_id", school.id),
     ]);
 
     const staffMap = new Map<string, NonNullable<StaffRow["staff"]>>();
@@ -103,6 +108,16 @@ export default function Staff() {
         // school_admin wins over teacher
         if (roleMap.get(r.user_id) === "school_admin") return;
         roleMap.set(r.user_id, r.role);
+      }
+    });
+    // profile.id -> { section_id, label }
+    const ctMap = new Map<string, { section_id: string; label: string }>();
+    (secs ?? []).forEach((s: any) => {
+      if (s.class_teacher_id) {
+        ctMap.set(s.class_teacher_id, {
+          section_id: s.id,
+          label: `${s.classes?.name ?? "Class"} ${s.name}`,
+        });
       }
     });
 
@@ -121,6 +136,7 @@ export default function Staff() {
           invite_status: (p.invite_status ?? "active") as StaffRow["invite_status"],
           invited_at: p.invited_at ?? null,
           staff: staffMap.get(p.user_id) ?? null,
+          class_teacher_of: ctMap.get(p.id) ?? null,
         } as StaffRow;
       })
       .filter((x): x is StaffRow => x !== null);
@@ -282,6 +298,7 @@ export default function Staff() {
                   <th className="px-5 py-3 font-semibold">Member</th>
                   <th className="px-5 py-3 font-semibold">Designation</th>
                   <th className="px-5 py-3 font-semibold">Department</th>
+                  <th className="px-5 py-3 font-semibold">Class</th>
                   <th className="px-5 py-3 font-semibold">Emp. ID</th>
                   <th className="px-5 py-3 font-semibold">Contact</th>
                   <th className="px-5 py-3 font-semibold text-right">Actions</th>
@@ -319,6 +336,17 @@ export default function Staff() {
                     </td>
                     <td className="px-5 py-3 text-foreground">{r.staff?.designation ?? "—"}</td>
                     <td className="px-5 py-3 text-muted-foreground">{r.staff?.department ?? "—"}</td>
+                    <td className="px-5 py-3">
+                      {r.class_teacher_of ? (
+                        <span className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full bg-success-soft text-success">
+                          {r.class_teacher_of.label}
+                        </span>
+                      ) : (
+                        <span className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                          No class
+                        </span>
+                      )}
+                    </td>
                     <td className="px-5 py-3 font-mono text-xs text-muted-foreground">{r.staff?.employee_id ?? "—"}</td>
                     <td className="px-5 py-3 text-xs">
                       <div className="space-y-0.5">

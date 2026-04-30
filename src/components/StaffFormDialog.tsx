@@ -48,6 +48,58 @@ export function StaffFormDialog({ open, onOpenChange, schoolId, existing, onSave
   const [salary, setSalary] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  // Class teacher assignment
+  type SectionOpt = {
+    section_id: string;
+    label: string;
+    current_teacher_id: string | null;
+    current_teacher_name: string | null;
+  };
+  const [sections, setSections] = useState<SectionOpt[]>([]);
+  const [classTeacherSection, setClassTeacherSection] = useState<string>("none");
+  const [originalSection, setOriginalSection] = useState<string>("none");
+
+  // Load sections + their current class teachers (by profile.id)
+  useEffect(() => {
+    if (!open || !schoolId) return;
+    (async () => {
+      const { data: secs } = await supabase
+        .from("sections")
+        .select("id, name, class_teacher_id, classes!inner(name)")
+        .eq("school_id", schoolId)
+        .order("name");
+      const teacherIds = Array.from(
+        new Set((secs ?? []).map((s: any) => s.class_teacher_id).filter(Boolean) as string[])
+      );
+      const profileMap = new Map<string, string>();
+      if (teacherIds.length) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("id, name")
+          .in("id", teacherIds);
+        (profs ?? []).forEach((p: any) => profileMap.set(p.id, p.name));
+      }
+      const opts: SectionOpt[] = (secs ?? []).map((s: any) => ({
+        section_id: s.id,
+        label: `${s.classes?.name ?? "Class"} ${s.name}`,
+        current_teacher_id: s.class_teacher_id ?? null,
+        current_teacher_name: s.class_teacher_id ? (profileMap.get(s.class_teacher_id) ?? "Unknown") : null,
+      }));
+      setSections(opts);
+
+      // Determine current assignment for the staff being edited
+      if (isEdit && existing?.profile_id) {
+        const mine = opts.find((o) => o.current_teacher_id === existing.profile_id);
+        const sid = mine?.section_id ?? "none";
+        setClassTeacherSection(sid);
+        setOriginalSection(sid);
+      } else {
+        setClassTeacherSection("none");
+        setOriginalSection("none");
+      }
+    })();
+  }, [open, schoolId, isEdit, existing?.profile_id]);
+
   useEffect(() => {
     if (existing) {
       setName(existing.name);
@@ -66,6 +118,27 @@ export function StaffFormDialog({ open, onOpenChange, schoolId, existing, onSave
       setEmployeeId(""); setDoj(""); setSalary("");
     }
   }, [existing, open]);
+
+  const applyClassTeacherAssignment = async (profileId: string): Promise<string | null> => {
+    if (classTeacherSection === originalSection) return null;
+    // 1) Unassign teacher from any previously assigned section (enforce 1 class per teacher)
+    const { error: clearErr } = await supabase
+      .from("sections")
+      .update({ class_teacher_id: null })
+      .eq("school_id", schoolId)
+      .eq("class_teacher_id", profileId);
+    if (clearErr) return clearErr.message;
+    // 2) Assign to the new section (if not "none")
+    if (classTeacherSection !== "none") {
+      const { error: setErr } = await supabase
+        .from("sections")
+        .update({ class_teacher_id: profileId })
+        .eq("school_id", schoolId)
+        .eq("id", classTeacherSection);
+      if (setErr) return setErr.message;
+    }
+    return null;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -138,6 +211,16 @@ export function StaffFormDialog({ open, onOpenChange, schoolId, existing, onSave
           .from("user_roles")
           .insert({ user_id: existing.user_id, school_id: schoolId, role });
         if (rErr) { setSubmitting(false); toast.error(rErr.message); return; }
+      }
+
+      // Class teacher assignment (single class per teacher)
+      if (role === "teacher") {
+        const ctErr = await applyClassTeacherAssignment(existing.profile_id);
+        if (ctErr) { setSubmitting(false); toast.error(ctErr); return; }
+      } else if (originalSection !== "none") {
+        // Promoted to admin: clear any existing class-teacher slot
+        await supabase.from("sections").update({ class_teacher_id: null })
+          .eq("school_id", schoolId).eq("class_teacher_id", existing.profile_id);
       }
 
       setSubmitting(false);
@@ -228,6 +311,54 @@ export function StaffFormDialog({ open, onOpenChange, schoolId, existing, onSave
               <Input id="ssal" type="number" min="0" value={salary} onChange={(e) => setSalary(e.target.value)} className="rounded-xl h-11" placeholder="35000" />
             </div>
           </div>
+
+          {isEdit && role === "teacher" && (
+            <div className="space-y-1.5 pt-1">
+              <Label>Assign as Class Teacher</Label>
+              <Select
+                value={classTeacherSection}
+                onValueChange={(v) => {
+                  if (v === "none") {
+                    if (originalSection !== "none") {
+                      if (!confirm("Remove class assignment for this teacher?")) return;
+                    }
+                    setClassTeacherSection("none");
+                    return;
+                  }
+                  const opt = sections.find((s) => s.section_id === v);
+                  if (
+                    opt?.current_teacher_id &&
+                    opt.current_teacher_id !== existing?.profile_id
+                  ) {
+                    if (!confirm(`${opt.label} is already assigned to ${opt.current_teacher_name}. Reassign?`)) return;
+                  }
+                  setClassTeacherSection(v);
+                }}
+              >
+                <SelectTrigger className="rounded-xl h-11">
+                  <SelectValue placeholder="Select a class" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">— No class assignment —</SelectItem>
+                  {sections.map((s) => {
+                    const suffix = s.current_teacher_id
+                      ? s.current_teacher_id === existing?.profile_id
+                        ? " (current)"
+                        : ` (${s.current_teacher_name})`
+                      : " (unassigned)";
+                    return (
+                      <SelectItem key={s.section_id} value={s.section_id}>
+                        {s.label}{suffix}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+              <p className="text-[11px] text-muted-foreground">
+                A teacher can only be class teacher of one class. Reassigning will free their previous class.
+              </p>
+            </div>
+          )}
 
           {!isEdit && (
             <p className="text-[11px] text-muted-foreground">

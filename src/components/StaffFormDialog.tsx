@@ -99,6 +99,8 @@ export function StaffFormDialog({ open, onOpenChange, schoolId, existing, onSave
       }
     })();
   }, [open, schoolId, isEdit, existing?.profile_id]);
+
+  useEffect(() => {
     if (existing) {
       setName(existing.name);
       setEmail(existing.email ?? "");

@@ -61,6 +61,21 @@ export default function Dashboard() {
   const [stats, setStats] = useState<Stats>({ totalStudents: 0, totalStaff: 0, presentToday: 0, presentPct: 0, feePendingK: 0 });
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
+  const [classTeacherOf, setClassTeacherOf] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!school?.id || !profile?.id || role !== "teacher") { setClassTeacherOf(null); return; }
+    (async () => {
+      const { data } = await supabase
+        .from("sections")
+        .select("name, classes!inner(name)")
+        .eq("school_id", school.id)
+        .eq("class_teacher_id", profile.id)
+        .maybeSingle();
+      if (data) setClassTeacherOf(`${(data as any).classes?.name ?? "Class"} ${(data as any).name}`);
+      else setClassTeacherOf(null);
+    })();
+  }, [school?.id, profile?.id, role]);
 
   useEffect(() => {
     if (!school?.id) return;

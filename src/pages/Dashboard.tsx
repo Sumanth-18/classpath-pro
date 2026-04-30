@@ -130,6 +130,13 @@ export default function Dashboard() {
         </p>
       </div>
 
+      {classTeacherOf && (
+        <div className="rounded-2xl border border-success/30 bg-success-soft px-4 py-3 text-sm font-medium text-success flex items-center gap-2">
+          <GraduationCap className="h-4 w-4" />
+          You are class teacher of {classTeacherOf}
+        </div>
+      )}
+
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
         {statCards.map((c) => {

@@ -119,6 +119,27 @@ export function StaffFormDialog({ open, onOpenChange, schoolId, existing, onSave
     }
   }, [existing, open]);
 
+  const applyClassTeacherAssignment = async (profileId: string): Promise<string | null> => {
+    if (classTeacherSection === originalSection) return null;
+    // 1) Unassign teacher from any previously assigned section (enforce 1 class per teacher)
+    const { error: clearErr } = await supabase
+      .from("sections")
+      .update({ class_teacher_id: null })
+      .eq("school_id", schoolId)
+      .eq("class_teacher_id", profileId);
+    if (clearErr) return clearErr.message;
+    // 2) Assign to the new section (if not "none")
+    if (classTeacherSection !== "none") {
+      const { error: setErr } = await supabase
+        .from("sections")
+        .update({ class_teacher_id: profileId })
+        .eq("school_id", schoolId)
+        .eq("id", classTeacherSection);
+      if (setErr) return setErr.message;
+    }
+    return null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) { toast.error("Name is required"); return; }

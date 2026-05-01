@@ -94,6 +94,10 @@ export default function Attendance() {
   // status picker dialog (long-press / ⋯)
   const [pickerFor, setPickerFor] = useState<string | null>(null);
 
+  // substitute log
+  const [subOpen, setSubOpen] = useState(false);
+  const [subInfo, setSubInfo] = useState<{ name: string } | null>(null);
+
   const isPast = useMemo(() => {
     const today = new Date(); today.setHours(0, 0, 0, 0);
     const d = new Date(date); d.setHours(0, 0, 0, 0);

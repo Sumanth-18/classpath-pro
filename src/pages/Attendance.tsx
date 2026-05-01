@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { format, startOfMonth, isToday, isFuture } from "date-fns";
-import { CalendarIcon, Loader2, Save, CheckCheck, MoreHorizontal, MessageCircle, History } from "lucide-react";
+import { CalendarIcon, Loader2, Save, CheckCheck, MoreHorizontal, MessageCircle, History, UserPlus2 } from "lucide-react";
+import { SubstituteLogDialog } from "@/components/SubstituteLogDialog";
 import toast from "react-hot-toast";
 
 import { useAuth } from "@/contexts/AuthContext";
@@ -92,6 +93,10 @@ export default function Attendance() {
 
   // status picker dialog (long-press / ⋯)
   const [pickerFor, setPickerFor] = useState<string | null>(null);
+
+  // substitute log
+  const [subOpen, setSubOpen] = useState(false);
+  const [subInfo, setSubInfo] = useState<{ name: string } | null>(null);
 
   const isPast = useMemo(() => {
     const today = new Date(); today.setHours(0, 0, 0, 0);
@@ -199,6 +204,25 @@ export default function Attendance() {
       setLoading(false);
     })();
   }, [school?.id, sectionId, dateStr, date]);
+
+  // Load substitute info for this section+date
+  useEffect(() => {
+    if (!school?.id || !sectionId) { setSubInfo(null); return; }
+    (async () => {
+      const { data } = await (supabase as any)
+        .from("substitute_log")
+        .select("substitute_teacher_id")
+        .eq("school_id", school.id)
+        .eq("section_id", sectionId)
+        .eq("date", dateStr)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (!data?.substitute_teacher_id) { setSubInfo(null); return; }
+      const { data: prof } = await supabase.from("profiles").select("name").eq("id", data.substitute_teacher_id).maybeSingle();
+      setSubInfo(prof ? { name: (prof as any).name } : null);
+    })();
+  }, [school?.id, sectionId, dateStr]);
 
   const counts = useMemo(() => {
     let p = 0, a = 0, l = 0, lv = 0;
@@ -361,6 +385,11 @@ export default function Attendance() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Attendance</h1>
           <p className="text-sm text-muted-foreground">Mark daily attendance for your class</p>
+          {subInfo && (
+            <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-info-soft px-3 py-1 text-xs font-medium text-info">
+              <UserPlus2 className="h-3 w-3" /> Substitute today: {subInfo.name}
+            </div>
+          )}
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {isAdmin ? (
@@ -414,6 +443,11 @@ export default function Attendance() {
             <Button onClick={markAllPresent} variant="secondary" disabled={loading || (isPast && !isAdmin)}>
               <CheckCheck className="mr-2 h-4 w-4" /> Mark all present
             </Button>
+            {isAdmin && (
+              <Button variant="outline" onClick={() => setSubOpen(true)}>
+                <UserPlus2 className="mr-2 h-4 w-4" /> Log Substitute
+              </Button>
+            )}
             <div className="flex items-center gap-2 rounded-md border bg-card px-3 py-2 text-sm">
               <MessageCircle className="h-4 w-4 text-muted-foreground" />
               <span className="text-muted-foreground">Suppress WhatsApp</span>
@@ -560,6 +594,9 @@ export default function Attendance() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <SubstituteLogDialog open={subOpen} onOpenChange={setSubOpen} defaultSectionId={sectionId} defaultDate={date} onSaved={() => { /* refresh subInfo */ setSubInfo(null); setTimeout(() => setSubOpen(false), 0); }} />
     </div>
   );
 }
+

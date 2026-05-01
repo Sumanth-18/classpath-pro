@@ -347,6 +347,7 @@ export type Database = {
           exam_type: string | null
           id: string
           name: string
+          published: boolean
           school_id: string
           start_date: string | null
         }
@@ -358,6 +359,7 @@ export type Database = {
           exam_type?: string | null
           id?: string
           name: string
+          published?: boolean
           school_id: string
           start_date?: string | null
         }
@@ -369,6 +371,7 @@ export type Database = {
           exam_type?: string | null
           id?: string
           name?: string
+          published?: boolean
           school_id?: string
           start_date?: string | null
         }
@@ -685,6 +688,33 @@ export type Database = {
           },
         ]
       }
+      homework_submissions: {
+        Row: {
+          assignment_id: string
+          created_at: string
+          id: string
+          marked_at: string | null
+          marked_done_by_parent: boolean
+          student_id: string
+        }
+        Insert: {
+          assignment_id: string
+          created_at?: string
+          id?: string
+          marked_at?: string | null
+          marked_done_by_parent?: boolean
+          student_id: string
+        }
+        Update: {
+          assignment_id?: string
+          created_at?: string
+          id?: string
+          marked_at?: string | null
+          marked_done_by_parent?: boolean
+          student_id?: string
+        }
+        Relationships: []
+      }
       leave_requests: {
         Row: {
           created_at: string
@@ -803,6 +833,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          is_read: boolean
+          receiver_id: string
+          school_id: string
+          sender_id: string
+          student_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          receiver_id: string
+          school_id: string
+          sender_id: string
+          student_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          receiver_id?: string
+          school_id?: string
+          sender_id?: string
+          student_id?: string
+        }
+        Relationships: []
       }
       notifications: {
         Row: {
@@ -1330,6 +1393,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      substitute_log: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          logged_by: string | null
+          note: string | null
+          school_id: string
+          section_id: string
+          substitute_teacher_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          logged_by?: string | null
+          note?: string | null
+          school_id: string
+          section_id: string
+          substitute_teacher_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          logged_by?: string | null
+          note?: string | null
+          school_id?: string
+          section_id?: string
+          substitute_teacher_id?: string
+        }
+        Relationships: []
       }
       teacher_assignments: {
         Row: {

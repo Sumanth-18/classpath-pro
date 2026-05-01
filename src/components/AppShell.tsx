@@ -1,11 +1,14 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth, AppRole } from "@/contexts/AuthContext";
 import { SchoolOSLogo } from "@/components/SchoolOSLogo";
 import { Button } from "@/components/ui/button";
+import { ChildSelector } from "@/components/ChildSelector";
+import { useChild } from "@/contexts/ChildContext";
+import { supabase } from "@/integrations/supabase/client";
 import {
   LayoutDashboard, Users, CalendarCheck, BookOpen, Wallet, ClipboardList, Clock,
-  UserCog, Megaphone, LogOut, Menu, X, Bell, ChevronRight,
+  UserCog, Megaphone, LogOut, Menu, X, Bell, ChevronRight, MessageSquare,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -14,18 +17,23 @@ type NavItem = {
   label: string;
   icon: typeof LayoutDashboard;
   roles: AppRole[];
+  badgeKey?: "messages";
 };
 
 const NAV: NavItem[] = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["school_admin", "teacher", "parent"] },
   { to: "/students", label: "Students", icon: Users, roles: ["school_admin", "teacher"] },
   { to: "/attendance", label: "Attendance", icon: CalendarCheck, roles: ["school_admin", "teacher", "parent"] },
-  { to: "/grades", label: "Grade Book", icon: BookOpen, roles: ["school_admin", "teacher", "parent"] },
+  { to: "/grades", label: "Grade Book", icon: BookOpen, roles: ["school_admin", "teacher"] },
+  { to: "/marks", label: "Marks", icon: BookOpen, roles: ["parent"] },
   { to: "/fees", label: "Fees", icon: Wallet, roles: ["school_admin", "parent"] },
-  { to: "/assignments", label: "Assignments", icon: ClipboardList, roles: ["school_admin", "teacher", "parent"] },
-  { to: "/timetable", label: "Timetable", icon: Clock, roles: ["school_admin", "teacher", "parent"] },
+  { to: "/messages", label: "Messages", icon: MessageSquare, roles: ["parent", "teacher"], badgeKey: "messages" },
+  { to: "/homework", label: "Homework", icon: ClipboardList, roles: ["parent"] },
+  { to: "/announcements", label: "Announcements", icon: Megaphone, roles: ["parent"] },
+  { to: "/assignments", label: "Assignments", icon: ClipboardList, roles: ["school_admin", "teacher"] },
+  { to: "/timetable", label: "Timetable", icon: Clock, roles: ["school_admin", "teacher"] },
   { to: "/staff", label: "Staff / HR", icon: UserCog, roles: ["school_admin"] },
-  { to: "/connect", label: "Connect", icon: Megaphone, roles: ["school_admin", "teacher", "parent"] },
+  { to: "/connect", label: "Connect", icon: Megaphone, roles: ["school_admin", "teacher"] },
 ];
 
 const ROLE_LABEL: Record<AppRole, string> = {
@@ -44,11 +52,35 @@ interface Props {
 }
 
 export function AppShell({ children }: Props) {
-  const { profile, school, role, signOut } = useAuth();
+  const { profile, school, role, user, signOut } = useAuth();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [unread, setUnread] = useState(0);
+
+  // Try to access ChildContext (parent only) but stay safe if not mounted
+  let childCtx: ReturnType<typeof useChild> | null = null;
+  try { childCtx = useChild(); } catch { /* not in provider */ }
 
   const items = NAV.filter((n) => !role || n.roles.includes(role));
+
+  useEffect(() => {
+    if (!user?.id) { setUnread(0); return; }
+    let active = true;
+    const load = async () => {
+      const { count } = await supabase
+        .from("messages")
+        .select("id", { count: "exact", head: true })
+        .eq("receiver_id", user.id)
+        .eq("is_read", false);
+      if (active) setUnread(count ?? 0);
+    };
+    load();
+    const ch = supabase
+      .channel(`unread-${user.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "messages", filter: `receiver_id=eq.${user.id}` }, load)
+      .subscribe();
+    return () => { active = false; supabase.removeChannel(ch); };
+  }, [user?.id]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -57,7 +89,6 @@ export function AppShell({ children }: Props) {
 
   const SidebarBody = (
     <div className="flex flex-col h-full">
-      {/* School header */}
       <div className="px-5 pt-6 pb-5 border-b border-sidebar-border">
         <SchoolOSLogo size="sm" />
         {school && (
@@ -70,10 +101,10 @@ export function AppShell({ children }: Props) {
         )}
       </div>
 
-      {/* Nav */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         {items.map((item) => {
           const Icon = item.icon;
+          const showBadge = item.badgeKey === "messages" && unread > 0;
           return (
             <NavLink
               key={item.to}
@@ -91,7 +122,14 @@ export function AppShell({ children }: Props) {
               {({ isActive }) => (
                 <>
                   <span className="flex items-center gap-3">
-                    <Icon className={cn("h-[18px] w-[18px]", isActive ? "text-primary" : "text-muted-foreground")} />
+                    <span className="relative">
+                      <Icon className={cn("h-[18px] w-[18px]", isActive ? "text-primary" : "text-muted-foreground")} />
+                      {showBadge && (
+                        <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-[16px] px-1 rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground flex items-center justify-center">
+                          {unread > 9 ? "9+" : unread}
+                        </span>
+                      )}
+                    </span>
                     <span>{item.label}</span>
                   </span>
                   {isActive && <ChevronRight className="h-4 w-4 text-primary" />}
@@ -102,7 +140,6 @@ export function AppShell({ children }: Props) {
         })}
       </nav>
 
-      {/* User block */}
       <div className="p-3 border-t border-sidebar-border">
         <div className="flex items-center gap-3 rounded-xl p-2.5 hover:bg-sidebar-accent/40 transition">
           <div className="h-9 w-9 rounded-full bg-gradient-brand flex items-center justify-center text-primary-foreground text-xs font-semibold shrink-0">
@@ -121,13 +158,11 @@ export function AppShell({ children }: Props) {
   );
 
   return (
-    <div className="min-h-screen flex bg-background">
-      {/* Desktop sidebar */}
+    <div className="min-h-screen flex w-full bg-background">
       <aside className="hidden lg:flex w-64 flex-col bg-sidebar border-r border-sidebar-border">
         {SidebarBody}
       </aside>
 
-      {/* Mobile drawer */}
       {mobileOpen && (
         <div className="lg:hidden fixed inset-0 z-50">
           <div className="absolute inset-0 bg-foreground/40" onClick={() => setMobileOpen(false)} />
@@ -144,9 +179,7 @@ export function AppShell({ children }: Props) {
         </div>
       )}
 
-      {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Top header */}
         <header className="h-14 lg:h-16 border-b border-border bg-card/80 backdrop-blur sticky top-0 z-30">
           <div className="h-full px-4 lg:px-8 flex items-center justify-between gap-4">
             <button
@@ -161,7 +194,11 @@ export function AppShell({ children }: Props) {
               <SchoolOSLogo size="sm" withWordmark={false} />
             </div>
 
-            <div className="flex-1" />
+            <div className="flex-1 flex items-center gap-3">
+              {role === "parent" && childCtx && childCtx.children.length > 1 && (
+                <ChildSelector />
+              )}
+            </div>
 
             <button className="relative h-9 w-9 rounded-xl flex items-center justify-center hover:bg-muted" aria-label="Notifications">
               <Bell className="h-[18px] w-[18px] text-muted-foreground" />

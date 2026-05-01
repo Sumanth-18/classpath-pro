@@ -594,6 +594,9 @@ export default function Attendance() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <SubstituteLogDialog open={subOpen} onOpenChange={setSubOpen} defaultSectionId={sectionId} defaultDate={date} onSaved={() => { /* refresh subInfo */ setSubInfo(null); setTimeout(() => setSubOpen(false), 0); }} />
     </div>
   );
 }
+

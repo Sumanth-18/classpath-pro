@@ -443,6 +443,11 @@ export default function Attendance() {
             <Button onClick={markAllPresent} variant="secondary" disabled={loading || (isPast && !isAdmin)}>
               <CheckCheck className="mr-2 h-4 w-4" /> Mark all present
             </Button>
+            {isAdmin && (
+              <Button variant="outline" onClick={() => setSubOpen(true)}>
+                <UserPlus2 className="mr-2 h-4 w-4" /> Log Substitute
+              </Button>
+            )}
             <div className="flex items-center gap-2 rounded-md border bg-card px-3 py-2 text-sm">
               <MessageCircle className="h-4 w-4 text-muted-foreground" />
               <span className="text-muted-foreground">Suppress WhatsApp</span>

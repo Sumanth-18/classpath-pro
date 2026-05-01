@@ -313,11 +313,11 @@ export default function AdminDashboard() {
       section_id: classTeacherOf!.sectionId,
       student_id: lr.student_id,
       date: format(d, "yyyy-MM-dd"),
-      status: "leave_approved",
+      status: "leave_approved" as const,
       notes: `Leave approved: ${lr.reason ?? ""}`.trim(),
       marked_by: profile?.id ?? null,
     }));
-    await supabase.from("attendance").upsert(rows, { onConflict: "student_id,date" });
+    await supabase.from("attendance").upsert(rows as any, { onConflict: "student_id,date" });
 
     await supabase.from("notifications").insert({
       school_id: school.id, user_id: lr.user_id,

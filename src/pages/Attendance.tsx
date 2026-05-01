@@ -205,6 +205,25 @@ export default function Attendance() {
     })();
   }, [school?.id, sectionId, dateStr, date]);
 
+  // Load substitute info for this section+date
+  useEffect(() => {
+    if (!school?.id || !sectionId) { setSubInfo(null); return; }
+    (async () => {
+      const { data } = await (supabase as any)
+        .from("substitute_log")
+        .select("substitute_teacher_id")
+        .eq("school_id", school.id)
+        .eq("section_id", sectionId)
+        .eq("date", dateStr)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (!data?.substitute_teacher_id) { setSubInfo(null); return; }
+      const { data: prof } = await supabase.from("profiles").select("name").eq("id", data.substitute_teacher_id).maybeSingle();
+      setSubInfo(prof ? { name: (prof as any).name } : null);
+    })();
+  }, [school?.id, sectionId, dateStr]);
+
   const counts = useMemo(() => {
     let p = 0, a = 0, l = 0, lv = 0;
     Object.values(records).forEach((r) => {

@@ -385,6 +385,11 @@ export default function Attendance() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Attendance</h1>
           <p className="text-sm text-muted-foreground">Mark daily attendance for your class</p>
+          {subInfo && (
+            <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-info-soft px-3 py-1 text-xs font-medium text-info">
+              <UserPlus2 className="h-3 w-3" /> Substitute today: {subInfo.name}
+            </div>
+          )}
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {isAdmin ? (

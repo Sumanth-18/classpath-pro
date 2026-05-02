@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { ChevronLeft, ChevronRight, CalendarIcon, FileEdit } from "lucide-react";
 import { addMonths, format, getDay, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isAfter, isWeekend, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
-import toast from "react-hot-toast";
+import { toast } from "@/lib/toast";
 
 type Status = "present" | "absent" | "late" | "leave_approved";
 

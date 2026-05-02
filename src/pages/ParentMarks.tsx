@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Download } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { jsPDF } from "jspdf";
-import toast from "react-hot-toast";
+import { toast } from "@/lib/toast";
 
 interface Exam { id: string; name: string; start_date: string | null; end_date: string | null; published: boolean; class_id: string | null }
 interface Mark { id: string; marks_obtained: number | null; max_marks: number | null; grade: string | null; subject_id: string; subjects: { name: string } | null }

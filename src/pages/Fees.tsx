@@ -2,9 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { format, isAfter, parseISO, startOfMonth, subMonths } from "date-fns";
 import {
   Plus, Search, Loader2, Pencil, Trash2, Receipt, MessageCircle, Flag,
-  Download, FileText, AlertTriangle, Wallet,
+  Download, FileText, AlertTriangle, Wallet, Users as UsersIcon,
 } from "lucide-react";
-import toast from "react-hot-toast";
+import { toast } from "@/lib/toast";
+import { BookLoader } from "@/components/BookLoader";
+import { EmptyState } from "@/components/EmptyState";
 import {
   BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip as ReTooltip, CartesianGrid,
 } from "recharts";
@@ -207,11 +209,17 @@ function StructuresTab({ schoolId }: { schoolId: string }) {
 
       <Card>
         {loading ? (
-          <div className="flex items-center justify-center p-12 text-muted-foreground">
-            <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Loading…
-          </div>
+          <BookLoader label="Loading fee categories…" />
         ) : rows.length === 0 ? (
-          <div className="p-12 text-center text-sm text-muted-foreground">No fee categories yet.</div>
+          <div className="p-6">
+            <EmptyState
+              icon={Wallet}
+              title="No fee categories yet"
+              description="Create a fee category (tuition, transport, etc.) and link it to one or more classes."
+              actionLabel="Add fee category"
+              onAction={() => { setEdit(null); setOpen(true); }}
+            />
+          </div>
         ) : (
           <Table>
             <TableHeader>
@@ -422,11 +430,15 @@ function DuesTab({
 
       <Card>
         {loading ? (
-          <div className="flex items-center justify-center p-12 text-muted-foreground">
-            <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Loading…
-          </div>
+          <BookLoader label="Loading dues…" />
         ) : filtered.length === 0 ? (
-          <div className="p-12 text-center text-sm text-muted-foreground">No students found.</div>
+          <div className="p-6">
+            <EmptyState
+              icon={UsersIcon}
+              title="No students with dues"
+              description="Either no students are enrolled yet, or no fee categories cover them."
+            />
+          </div>
         ) : (
           <Table>
             <TableHeader>
@@ -571,11 +583,15 @@ function HistoryTab({ schoolId }: { schoolId: string }) {
       </div>
       <Card>
         {loading ? (
-          <div className="flex items-center justify-center p-12 text-muted-foreground">
-            <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Loading…
-          </div>
+          <BookLoader label="Loading payments…" />
         ) : filtered.length === 0 ? (
-          <div className="p-12 text-center text-sm text-muted-foreground">No payments yet.</div>
+          <div className="p-6">
+            <EmptyState
+              icon={Receipt}
+              title="No payments recorded yet"
+              description="Once you collect a fee, the payment receipt will appear here."
+            />
+          </div>
         ) : (
           <Table>
             <TableHeader>
@@ -695,11 +711,7 @@ function ReportsTab({ schoolId }: { schoolId: string }) {
     URL.revokeObjectURL(url);
   };
 
-  if (loading) return (
-    <div className="flex items-center justify-center p-12 text-muted-foreground">
-      <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Loading…
-    </div>
-  );
+  if (loading) return <BookLoader label="Loading fees overview…" fullPage />;
 
   const chartData = [
     { label: format(subMonths(new Date(), 1), "MMM"), value: lastMonth },

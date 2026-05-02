@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Send, MessageSquare } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import toast from "react-hot-toast";
+import { toast } from "@/lib/toast";
 
 interface Conversation {
   student_id: string;

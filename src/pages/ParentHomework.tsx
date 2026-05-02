@@ -7,7 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { format, parseISO, isBefore } from "date-fns";
 import { ClipboardList } from "lucide-react";
-import toast from "react-hot-toast";
+import { toast } from "@/lib/toast";
 
 const sb: any = supabase;
 

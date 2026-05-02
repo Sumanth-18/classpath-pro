@@ -6,11 +6,14 @@ import { Input } from "@/components/ui/input";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Plus, Search, Loader2, Pencil, Trash2, BookOpen, Upload, Mail, Phone, Send } from "lucide-react";
-import toast from "react-hot-toast";
+import { Plus, Search, Loader2, Pencil, Trash2, BookOpen, Upload, Mail, Phone, Send, UserCog } from "lucide-react";
+import { toast } from "@/lib/toast";
 import { StaffFormDialog } from "@/components/StaffFormDialog";
 import { TeacherAssignmentsDialog } from "@/components/TeacherAssignmentsDialog";
 import { ImportStaffDialog } from "@/components/ImportStaffDialog";
+import { BookLoader } from "@/components/BookLoader";
+import { EmptyState } from "@/components/EmptyState";
+import { TypeToConfirmDialog } from "@/components/TypeToConfirmDialog";
 
 export type StaffRole = "teacher" | "school_admin";
 
@@ -74,6 +77,7 @@ export default function Staff() {
   const [editStaff, setEditStaff] = useState<StaffRow | null>(null);
   const [assignFor, setAssignFor] = useState<StaffRow | null>(null);
   const [importOpen, setImportOpen] = useState(false);
+  const [deleteRow, setDeleteRow] = useState<StaffRow | null>(null);
 
   const canManage = role === "school_admin";
 
@@ -211,7 +215,6 @@ export default function Staff() {
   };
 
   const handleDelete = async (r: StaffRow) => {
-    if (!confirm(`Deactivate ${r.name}? They will no longer appear in the active staff list.`)) return;
     const { error } = await supabase
       .from("profiles")
       .update({ is_active: false })
@@ -283,16 +286,28 @@ export default function Staff() {
       {/* Table */}
       <div className="card-soft overflow-hidden">
         {loading ? (
-          <div className="py-20 flex items-center justify-center text-muted-foreground">
-            <Loader2 className="h-5 w-5 animate-spin" />
+          <BookLoader label="Loading staff…" />
+        ) : rows.length === 0 ? (
+          <div className="p-6">
+            <EmptyState
+              icon={UserCog}
+              title="No staff added yet"
+              description="Add teachers and admins to assign classes, manage attendance and more."
+              actionLabel={canManage ? "Add Staff" : undefined}
+              onAction={canManage ? () => { setEditStaff(null); setFormOpen(true); } : undefined}
+            />
           </div>
         ) : filtered.length === 0 ? (
-          <div className="py-16 text-center">
-            <div className="text-sm text-muted-foreground">No staff found.</div>
+          <div className="p-6">
+            <EmptyState
+              icon={Search}
+              title="No matches"
+              description="Try a different search term or filter."
+            />
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div className="overflow-x-auto -mx-px">
+            <table className="w-full text-sm min-w-[820px]">
               <thead className="bg-muted/40">
                 <tr className="text-left text-[11px] uppercase tracking-wider text-muted-foreground">
                   <th className="px-5 py-3 font-semibold">Member</th>
@@ -395,7 +410,7 @@ export default function Staff() {
                               <Pencil className="h-3.5 w-3.5" />
                             </button>
                             <button
-                              onClick={() => handleDelete(r)}
+                              onClick={() => setDeleteRow(r)}
                               className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition"
                               title="Remove"
                               aria-label={`Remove ${r.name}`}
@@ -437,6 +452,17 @@ export default function Staff() {
           />
         </>
       )}
+
+      <TypeToConfirmDialog
+        open={deleteRow !== null}
+        onOpenChange={(v) => { if (!v) setDeleteRow(null); }}
+        title={`Remove ${deleteRow?.name ?? "staff member"}?`}
+        description="This deactivates the staff profile. Their historical records (attendance marked, marks entered, etc.) are preserved."
+        confirmText={deleteRow?.name ?? ""}
+        promptLabel={<>Type the staff member&apos;s full name <span className="font-mono font-semibold text-foreground">{deleteRow?.name}</span> to confirm</>}
+        confirmLabel="Remove staff"
+        onConfirm={async () => { if (deleteRow) await handleDelete(deleteRow); }}
+      />
     </div>
   );
 }

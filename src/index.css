@@ -54,10 +54,13 @@
     /* Semantic accent palette used across pages */
     --success: 152 60% 38%;
     --success-soft: 152 70% 94%;
+    --success-foreground: 0 0% 100%;
     --warning: 38 92% 50%;
     --warning-soft: 38 100% 95%;
+    --warning-foreground: 0 0% 100%;
     --info: 217 91% 60%;
     --info-soft: 217 100% 96%;
+    --info-foreground: 0 0% 100%;
     --violet: 262 83% 58%;
     --violet-soft: 262 100% 96%;
 

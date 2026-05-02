@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { format, startOfMonth, isToday, isFuture } from "date-fns";
 import { CalendarIcon, Loader2, Save, CheckCheck, MoreHorizontal, MessageCircle, History, UserPlus2 } from "lucide-react";
 import { SubstituteLogDialog } from "@/components/SubstituteLogDialog";
-import toast from "react-hot-toast";
+import { toast } from "@/lib/toast";
 
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";

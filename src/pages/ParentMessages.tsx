@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
 import { format } from "date-fns";
-import toast from "react-hot-toast";
+import { toast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 
 interface Msg { id: string; sender_id: string; receiver_id: string; body: string; created_at: string; is_read: boolean; student_id: string }

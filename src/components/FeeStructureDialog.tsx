@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import { toast } from "@/lib/toast";
 import { Plus, Trash2, Loader2 } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";

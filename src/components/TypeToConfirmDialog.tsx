@@ -20,7 +20,7 @@ interface Props {
   /** The exact text the user must type to enable the destructive action. */
   confirmText: string;
   /** Optional override for the prompt label. */
-  promptLabel?: string;
+  promptLabel?: ReactNode;
   confirmLabel?: string;
   onConfirm: () => Promise<void> | void;
 }

@@ -10,11 +10,14 @@ import {
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, Search, ChevronRight, Loader2, Upload, Pencil, Trash2 } from "lucide-react";
+import { Plus, Search, ChevronRight, Loader2, Upload, Pencil, Trash2, Users as UsersIcon } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { ImportStudentsDialog } from "@/components/ImportStudentsDialog";
 import { StudentDetailDialog } from "@/components/StudentDetailDialog";
 import { EditStudentDialog } from "@/components/EditStudentDialog";
+import { BookLoader } from "@/components/BookLoader";
+import { EmptyState } from "@/components/EmptyState";
+import { TypeToConfirmDialog } from "@/components/TypeToConfirmDialog";
 
 type Gender = "male" | "female" | "other";
 
@@ -60,6 +63,7 @@ export default function Students() {
   const [importOpen, setImportOpen] = useState(false);
   const [viewStudentId, setViewStudentId] = useState<string | null>(null);
   const [editStudent, setEditStudent] = useState<Student | null>(null);
+  const [deleteStudent, setDeleteStudent] = useState<Student | null>(null);
 
   const canAdd = role === "school_admin";
 
@@ -87,7 +91,6 @@ export default function Students() {
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [school?.id]);
 
   const handleDelete = async (s: Student) => {
-    if (!confirm(`Remove ${s.name} from active students? This won't delete their records.`)) return;
     const { error } = await supabase
       .from("students")
       .update({ is_active: false })
@@ -181,16 +184,28 @@ export default function Students() {
       {/* Table */}
       <div className="card-soft overflow-hidden">
         {loading ? (
-          <div className="py-20 flex items-center justify-center text-muted-foreground">
-            <Loader2 className="h-5 w-5 animate-spin" />
+          <BookLoader label="Loading students…" />
+        ) : students.length === 0 ? (
+          <div className="p-6">
+            <EmptyState
+              icon={UsersIcon}
+              title="No students added yet"
+              description="Add your first student to start tracking attendance, fees and grades."
+              actionLabel={canAdd ? "Add Student" : undefined}
+              onAction={canAdd ? () => setOpen(true) : undefined}
+            />
           </div>
         ) : filtered.length === 0 ? (
-          <div className="py-16 text-center">
-            <div className="text-sm text-muted-foreground">No students found.</div>
+          <div className="p-6">
+            <EmptyState
+              icon={Search}
+              title="No matches"
+              description="Try a different search term or clear the section filter."
+            />
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div className="overflow-x-auto -mx-px">
+            <table className="w-full text-sm min-w-[640px]">
               <thead className="bg-muted/40">
                 <tr className="text-left text-[11px] uppercase tracking-wider text-muted-foreground">
                   <th className="px-5 py-3 font-semibold">Student</th>
@@ -250,7 +265,7 @@ export default function Students() {
                               <Pencil className="h-3.5 w-3.5" />
                             </button>
                             <button
-                              onClick={() => handleDelete(s)}
+                              onClick={() => setDeleteStudent(s)}
                               className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition"
                               aria-label={`Delete ${s.name}`}
                               title="Remove"
@@ -281,6 +296,16 @@ export default function Students() {
         student={editStudent}
         sections={sections}
         onSaved={load}
+      />
+      <TypeToConfirmDialog
+        open={deleteStudent !== null}
+        onOpenChange={(v) => { if (!v) setDeleteStudent(null); }}
+        title={`Delete ${deleteStudent?.name ?? "student"}?`}
+        description="This removes the student from active rosters. Their historical attendance, fees and grades are preserved but the profile will no longer appear in lists."
+        confirmText={deleteStudent?.name ?? ""}
+        promptLabel={<>Type the student&apos;s full name <span className="font-mono font-semibold text-foreground">{deleteStudent?.name}</span> to confirm</>}
+        confirmLabel="Delete student"
+        onConfirm={async () => { if (deleteStudent) await handleDelete(deleteStudent); }}
       />
     </div>
   );

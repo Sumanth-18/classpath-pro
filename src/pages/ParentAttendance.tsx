@@ -92,7 +92,8 @@ export default function ParentAttendance() {
       user_id: user.id,
       from_date: format(from, "yyyy-MM-dd"),
       to_date: format(to, "yyyy-MM-dd"),
-      reason: `[Student: ${activeChild.id}] ${leaveType}: ${reason.trim()}`,
+      student_id: activeChild.id,
+      reason: `${leaveType}: ${reason.trim()}`,
       leave_type: leaveType,
       status: "pending",
     });

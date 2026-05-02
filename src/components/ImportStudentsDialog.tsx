@@ -6,7 +6,7 @@ import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Loader2, Upload, FileDown, AlertCircle, CheckCircle2, X } from "lucide-react";
-import toast from "react-hot-toast";
+import { toast } from "@/lib/toast";
 
 interface SectionLite {
   id: string;

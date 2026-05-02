@@ -11,7 +11,7 @@ import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { Plus, Search, ChevronRight, Loader2, Upload, Pencil, Trash2 } from "lucide-react";
-import toast from "react-hot-toast";
+import { toast } from "@/lib/toast";
 import { ImportStudentsDialog } from "@/components/ImportStudentsDialog";
 import { StudentDetailDialog } from "@/components/StudentDetailDialog";
 import { EditStudentDialog } from "@/components/EditStudentDialog";

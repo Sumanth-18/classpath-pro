@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SchoolOSLogo } from "@/components/SchoolOSLogo";
 import { Check, Loader2, CalendarCheck, BookOpen, Wallet, ClipboardList, UserCog, MessageCircle, Sparkles } from "lucide-react";
-import toast from "react-hot-toast";
+import { toast } from "@/lib/toast";
 
 const FEATURES = [
   { icon: CalendarCheck, label: "Daily attendance + WhatsApp alerts" },

@@ -4,7 +4,7 @@ import {
   Plus, Search, Loader2, Pencil, Trash2, Receipt, MessageCircle, Flag,
   Download, FileText, AlertTriangle, Wallet,
 } from "lucide-react";
-import toast from "react-hot-toast";
+import { toast } from "@/lib/toast";
 import {
   BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip as ReTooltip, CartesianGrid,
 } from "recharts";

@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { SchoolOSLogo } from "@/components/SchoolOSLogo";
 import { InstallBanner } from "@/components/InstallBanner";
 import { Loader2, Shield, GraduationCap, Heart } from "lucide-react";
-import toast from "react-hot-toast";
+import { toast } from "@/lib/toast";
 
 const DEMO_PASSWORD = "demo1234";
 const DEMO_ACCOUNTS = {

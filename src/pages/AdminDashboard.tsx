@@ -231,7 +231,7 @@ export default function AdminDashboard() {
 
     const { data: lr } = await supabase
       .from("leave_requests")
-      .select("id, user_id, from_date, to_date, reason, leave_type, status")
+      .select("id, user_id, student_id, from_date, to_date, reason, leave_type, status")
       .eq("school_id", school.id)
       .eq("status", "pending")
       .order("from_date", { ascending: true });
@@ -245,7 +245,14 @@ export default function AdminDashboard() {
 
     const list: PendingLeave[] = [];
     (lr ?? []).forEach((r: any) => {
-      const { studentId, clean } = parseLeaveReason(r.reason);
+      // Prefer the new student_id column; fall back to legacy "[Student: <uuid>] ..." encoding
+      let studentId: string | null = r.student_id ?? null;
+      let clean: string = r.reason ?? "";
+      if (!studentId) {
+        const parsed = parseLeaveReason(r.reason);
+        studentId = parsed.studentId;
+        clean = parsed.clean;
+      }
       if (!studentId || !studById.has(studentId)) return; // only my section's students
       list.push({
         id: r.id, user_id: r.user_id,

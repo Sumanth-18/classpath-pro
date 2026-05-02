@@ -724,6 +724,7 @@ export type Database = {
           reason: string | null
           school_id: string
           status: Database["public"]["Enums"]["leave_status"] | null
+          student_id: string | null
           to_date: string | null
           user_id: string
         }
@@ -735,6 +736,7 @@ export type Database = {
           reason?: string | null
           school_id: string
           status?: Database["public"]["Enums"]["leave_status"] | null
+          student_id?: string | null
           to_date?: string | null
           user_id: string
         }
@@ -746,6 +748,7 @@ export type Database = {
           reason?: string | null
           school_id?: string
           status?: Database["public"]["Enums"]["leave_status"] | null
+          student_id?: string | null
           to_date?: string | null
           user_id?: string
         }
@@ -755,6 +758,13 @@ export type Database = {
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_requests_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
             referencedColumns: ["id"]
           },
         ]

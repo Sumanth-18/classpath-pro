@@ -497,7 +497,7 @@ export default function AdminDashboard() {
             <span className="rounded-full bg-warning-soft px-2 py-0.5 text-xs font-medium text-warning">{pendingLeaves.length}</span>
           </div>
           {pendingLeaves.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-4 text-center">No pending requests.</p>
+            <EmptyState icon={CheckCircle2} title="All caught up" description="No pending leave requests right now." />
           ) : (
             <div className="space-y-2">
               {pendingLeaves.map((lr) => (

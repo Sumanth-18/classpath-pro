@@ -448,14 +448,17 @@ export default function AdminDashboard() {
           <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
             <div>
               <h3 className="text-sm font-semibold flex items-center gap-2"><RefreshCw className="h-4 w-4 text-primary" /> Weekly digest</h3>
-              <p className="text-xs text-muted-foreground">{isMonday ? "Monday recap of last week" : "Snapshot — refresh to recalculate"}</p>
+              <p className="text-xs text-muted-foreground">
+                {isMonday ? "Monday recap of last week" : "Snapshot — refresh to recalculate"}
+                {digestUpdatedAt && <> · Updated {formatDistanceToNow(digestUpdatedAt, { addSuffix: true })}</>}
+              </p>
             </div>
             <Button variant="outline" size="sm" onClick={loadDigest} disabled={digestLoading}>
               <RefreshCw className={`mr-2 h-3 w-3 ${digestLoading ? "animate-spin" : ""}`} /> Refresh
             </Button>
           </div>
           {!digest ? (
-            <div className="text-sm text-muted-foreground py-6 text-center">Loading…</div>
+            <BookLoader label="Crunching this week's numbers…" />
           ) : (
             <div className="grid md:grid-cols-2 gap-4">
               <div className="rounded-lg border bg-card p-3">

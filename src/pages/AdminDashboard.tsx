@@ -417,9 +417,14 @@ export default function AdminDashboard() {
       {/* AT-RISK CARD (admin only) */}
       {isAdmin && atRisk.length > 0 && (
         <Card className="p-5 border-destructive/30 bg-[hsl(0_100%_98%)]">
-          <div className="flex items-center gap-2 mb-3">
-            <AlertTriangle className="h-4 w-4 text-destructive" />
-            <h3 className="text-sm font-semibold text-destructive">{atRisk.length} student{atRisk.length === 1 ? "" : "s"} at risk</h3>
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-destructive" />
+              <h3 className="text-sm font-semibold text-destructive">{atRisk.length} student{atRisk.length === 1 ? "" : "s"} at risk</h3>
+            </div>
+            {atRiskUpdatedAt && (
+              <span className="text-[11px] text-muted-foreground">Updated {formatDistanceToNow(atRiskUpdatedAt, { addSuffix: true })}</span>
+            )}
           </div>
           <p className="text-xs text-muted-foreground mb-3">Below 75% attendance this month and have overdue fees.</p>
           <div className="space-y-1.5">

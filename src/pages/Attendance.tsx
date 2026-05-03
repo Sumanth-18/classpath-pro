@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { format, startOfMonth, isToday, isFuture } from "date-fns";
-import { CalendarIcon, Loader2, Save, CheckCheck, MoreHorizontal, MessageCircle, History, UserPlus2 } from "lucide-react";
+import { CalendarIcon, Loader2, Save, CheckCheck, MoreHorizontal, MessageCircle, History, UserPlus2, Users } from "lucide-react";
 import { SubstituteLogDialog } from "@/components/SubstituteLogDialog";
+import { BookLoader } from "@/components/BookLoader";
+import { EmptyState } from "@/components/EmptyState";
 import { toast } from "@/lib/toast";
 
 import { useAuth } from "@/contexts/AuthContext";

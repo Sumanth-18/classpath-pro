@@ -35,6 +35,7 @@ export default function ParentDashboard() {
   const navigate = useNavigate();
   const [stats, setStats] = useState<Stats>({ attendancePct: null, pendingFee: 0, pendingHomework: 0, lastExamPct: null });
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!activeChild?.id || !school?.id) return;

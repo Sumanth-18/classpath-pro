@@ -55,6 +55,7 @@ function genderBadge(g: Gender | null) {
 
 export default function Students() {
   const { school, role } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [students, setStudents] = useState<Student[]>([]);
   const [sections, setSections] = useState<Section[]>([]);
   const [loading, setLoading] = useState(true);
@@ -65,6 +66,18 @@ export default function Students() {
   const [viewStudentId, setViewStudentId] = useState<string | null>(null);
   const [editStudent, setEditStudent] = useState<Student | null>(null);
   const [deleteStudent, setDeleteStudent] = useState<Student | null>(null);
+
+  // Open from ?id=… query param (e.g. global search navigation)
+  useEffect(() => {
+    const id = searchParams.get("id");
+    if (id) {
+      setViewStudentId(id);
+      const next = new URLSearchParams(searchParams);
+      next.delete("id");
+      setSearchParams(next, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const canAdd = role === "school_admin";
 

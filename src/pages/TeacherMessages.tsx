@@ -4,7 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Send, MessageSquare } from "lucide-react";
+import { Send, MessageSquare, Users } from "lucide-react";
+import { EmptyState } from "@/components/EmptyState";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "@/lib/toast";
@@ -149,8 +150,12 @@ export default function TeacherMessages() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-[70vh]">
         <Card className="md:col-span-1 overflow-y-auto">
           {convos.length === 0 ? (
-            <div className="p-6 text-center text-sm text-muted-foreground">
-              No parents linked to your class yet.
+            <div className="p-4">
+              <EmptyState
+                icon={Users}
+                title="No parent conversations yet"
+                description="When parents in your class send a message, it will show up here."
+              />
             </div>
           ) : convos.map((c) => (
             <button
@@ -192,7 +197,11 @@ export default function TeacherMessages() {
               </div>
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 {messages.length === 0 ? (
-                  <p className="text-center text-sm text-muted-foreground py-12">No messages yet.</p>
+                  <EmptyState
+                    icon={MessageSquare}
+                    title="No messages yet"
+                    description={`Start the conversation with ${activeStudent.parent_name}.`}
+                  />
                 ) : messages.map((m) => {
                   const mine = m.sender_id === user?.id;
                   return (

@@ -4,6 +4,7 @@ import { useAuth, AppRole } from "@/contexts/AuthContext";
 import { SchoolOSLogo } from "@/components/SchoolOSLogo";
 import { Button } from "@/components/ui/button";
 import { ChildSelector } from "@/components/ChildSelector";
+import { GlobalSearch } from "@/components/GlobalSearch";
 import { useChild } from "@/contexts/ChildContext";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -198,6 +199,7 @@ export function AppShell({ children }: Props) {
               {role === "parent" && childCtx && childCtx.children.length > 1 && (
                 <ChildSelector />
               )}
+              {role === "school_admin" && <GlobalSearch />}
             </div>
 
             <button className="relative h-9 w-9 rounded-xl flex items-center justify-center hover:bg-muted" aria-label="Notifications">

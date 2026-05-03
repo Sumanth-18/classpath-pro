@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { format, startOfMonth, isToday, isFuture } from "date-fns";
-import { CalendarIcon, Loader2, Save, CheckCheck, MoreHorizontal, MessageCircle, History, UserPlus2 } from "lucide-react";
+import { CalendarIcon, Loader2, Save, CheckCheck, MoreHorizontal, MessageCircle, History, UserPlus2, Users } from "lucide-react";
 import { SubstituteLogDialog } from "@/components/SubstituteLogDialog";
+import { BookLoader } from "@/components/BookLoader";
+import { EmptyState } from "@/components/EmptyState";
 import { toast } from "@/lib/toast";
 
 import { useAuth } from "@/contexts/AuthContext";
@@ -466,12 +468,14 @@ export default function Attendance() {
       {/* list */}
       <Card className="divide-y">
         {loading ? (
-          <div className="flex items-center justify-center p-12 text-muted-foreground">
-            <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Loading…
-          </div>
+          <BookLoader label="Loading attendance…" />
         ) : students.length === 0 ? (
-          <div className="p-12 text-center text-sm text-muted-foreground">
-            {sectionId ? "No active students in this class." : "Select a class to begin."}
+          <div className="p-6">
+            <EmptyState
+              icon={Users}
+              title={sectionId ? "No active students" : "Select a class"}
+              description={sectionId ? "There are no active students in this class." : "Choose a class above to mark attendance."}
+            />
           </div>
         ) : (
           students.map((s) => {

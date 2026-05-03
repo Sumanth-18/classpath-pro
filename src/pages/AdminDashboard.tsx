@@ -12,7 +12,9 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { format, startOfMonth, endOfMonth, subMonths, eachDayOfInterval, isWeekend, parseISO } from "date-fns";
+import { format, startOfMonth, endOfMonth, subMonths, eachDayOfInterval, isWeekend, parseISO, formatDistanceToNow } from "date-fns";
+import { BookLoader } from "@/components/BookLoader";
+import { EmptyState } from "@/components/EmptyState";
 import { toast } from "@/lib/toast";
 
 interface Stats {
@@ -91,7 +93,9 @@ export default function AdminDashboard() {
 
   // admin extras
   const [atRisk, setAtRisk] = useState<AtRiskRow[]>([]);
+  const [atRiskUpdatedAt, setAtRiskUpdatedAt] = useState<Date | null>(null);
   const [digest, setDigest] = useState<DigestData | null>(null);
+  const [digestUpdatedAt, setDigestUpdatedAt] = useState<Date | null>(null);
   const [digestLoading, setDigestLoading] = useState(false);
   const isMonday = new Date().getDay() === 1;
 
@@ -171,6 +175,7 @@ export default function AdminDashboard() {
       });
       out.sort((a, b) => a.pct - b.pct);
       setAtRisk(out);
+      setAtRiskUpdatedAt(new Date());
     })();
   }, [school?.id, role]);
 
@@ -218,6 +223,7 @@ export default function AdminDashboard() {
       .map((s: any) => ({ id: s.id, label: `${s.classes?.name ?? "Class"} - ${s.name}` }));
 
     setDigest({ lowAttendance, feeThisMonth, feeLastMonth, staleUnread, sectionsMissingToday });
+    setDigestUpdatedAt(new Date());
     setDigestLoading(false);
   };
   useEffect(() => { if (role === "school_admin") loadDigest(); /* eslint-disable-next-line */ }, [school?.id, role]);
@@ -411,9 +417,14 @@ export default function AdminDashboard() {
       {/* AT-RISK CARD (admin only) */}
       {isAdmin && atRisk.length > 0 && (
         <Card className="p-5 border-destructive/30 bg-[hsl(0_100%_98%)]">
-          <div className="flex items-center gap-2 mb-3">
-            <AlertTriangle className="h-4 w-4 text-destructive" />
-            <h3 className="text-sm font-semibold text-destructive">{atRisk.length} student{atRisk.length === 1 ? "" : "s"} at risk</h3>
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-destructive" />
+              <h3 className="text-sm font-semibold text-destructive">{atRisk.length} student{atRisk.length === 1 ? "" : "s"} at risk</h3>
+            </div>
+            {atRiskUpdatedAt && (
+              <span className="text-[11px] text-muted-foreground">Updated {formatDistanceToNow(atRiskUpdatedAt, { addSuffix: true })}</span>
+            )}
           </div>
           <p className="text-xs text-muted-foreground mb-3">Below 75% attendance this month and have overdue fees.</p>
           <div className="space-y-1.5">
@@ -437,14 +448,17 @@ export default function AdminDashboard() {
           <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
             <div>
               <h3 className="text-sm font-semibold flex items-center gap-2"><RefreshCw className="h-4 w-4 text-primary" /> Weekly digest</h3>
-              <p className="text-xs text-muted-foreground">{isMonday ? "Monday recap of last week" : "Snapshot — refresh to recalculate"}</p>
+              <p className="text-xs text-muted-foreground">
+                {isMonday ? "Monday recap of last week" : "Snapshot — refresh to recalculate"}
+                {digestUpdatedAt && <> · Updated {formatDistanceToNow(digestUpdatedAt, { addSuffix: true })}</>}
+              </p>
             </div>
             <Button variant="outline" size="sm" onClick={loadDigest} disabled={digestLoading}>
               <RefreshCw className={`mr-2 h-3 w-3 ${digestLoading ? "animate-spin" : ""}`} /> Refresh
             </Button>
           </div>
           {!digest ? (
-            <div className="text-sm text-muted-foreground py-6 text-center">Loading…</div>
+            <BookLoader label="Crunching this week's numbers…" />
           ) : (
             <div className="grid md:grid-cols-2 gap-4">
               <div className="rounded-lg border bg-card p-3">
@@ -483,7 +497,7 @@ export default function AdminDashboard() {
             <span className="rounded-full bg-warning-soft px-2 py-0.5 text-xs font-medium text-warning">{pendingLeaves.length}</span>
           </div>
           {pendingLeaves.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-4 text-center">No pending requests.</p>
+            <EmptyState icon={CheckCircle2} title="All caught up" description="No pending leave requests right now." />
           ) : (
             <div className="space-y-2">
               {pendingLeaves.map((lr) => (
@@ -574,22 +588,31 @@ export default function AdminDashboard() {
               View all <ArrowRight className="h-3 w-3" />
             </button>
           </div>
-          <ul className="space-y-2">
-            {announcements.length === 0 && !loading && (
-              <li className="text-sm text-muted-foreground py-6 text-center">No announcements yet.</li>
-            )}
-            {announcements.map((a) => (
-              <li key={a.id} className="flex items-start gap-3 rounded-xl p-3 hover:bg-muted/60 transition">
-                <div className="h-9 w-9 rounded-xl bg-brand-50 flex items-center justify-center shrink-0">
-                  <Bell className="h-4 w-4 text-brand-600" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-foreground line-clamp-1">{a.title}</div>
-                  <div className="text-[11px] text-muted-foreground mt-0.5">{timeAgo(a.created_at)}</div>
-                </div>
-              </li>
-            ))}
-          </ul>
+          {loading ? (
+            <BookLoader />
+          ) : announcements.length === 0 ? (
+            <EmptyState
+              icon={Bell}
+              title="No announcements yet"
+              description="Posted announcements will appear here."
+              actionLabel="Create announcement"
+              onAction={() => navigate("/connect")}
+            />
+          ) : (
+            <ul className="space-y-2">
+              {announcements.map((a) => (
+                <li key={a.id} className="flex items-start gap-3 rounded-xl p-3 hover:bg-muted/60 transition">
+                  <div className="h-9 w-9 rounded-xl bg-brand-50 flex items-center justify-center shrink-0">
+                    <Bell className="h-4 w-4 text-brand-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium text-foreground line-clamp-1">{a.title}</div>
+                    <div className="text-[11px] text-muted-foreground mt-0.5">{timeAgo(a.created_at)}</div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         <div className="space-y-3">

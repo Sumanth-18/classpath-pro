@@ -62,6 +62,13 @@ export function EditStudentDialog({ open, onOpenChange, student, sections, onSav
       toast.error("Name and admission number are required");
       return;
     }
+    if (dob) {
+      const d = new Date(dob);
+      if (isNaN(d.getTime()) || d > new Date()) {
+        toast.error("Date of birth cannot be in the future");
+        return;
+      }
+    }
     setSubmitting(true);
     const { error } = await supabase
       .from("students")

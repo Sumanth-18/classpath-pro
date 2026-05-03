@@ -93,7 +93,9 @@ export default function AdminDashboard() {
 
   // admin extras
   const [atRisk, setAtRisk] = useState<AtRiskRow[]>([]);
+  const [atRiskUpdatedAt, setAtRiskUpdatedAt] = useState<Date | null>(null);
   const [digest, setDigest] = useState<DigestData | null>(null);
+  const [digestUpdatedAt, setDigestUpdatedAt] = useState<Date | null>(null);
   const [digestLoading, setDigestLoading] = useState(false);
   const isMonday = new Date().getDay() === 1;
 

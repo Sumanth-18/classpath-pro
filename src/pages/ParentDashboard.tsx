@@ -81,12 +81,20 @@ export default function ParentDashboard() {
 
       setStats({ attendancePct, pendingFee, pendingHomework, lastExamPct });
       setAnnouncements((ann ?? []) as Announcement[]);
+      setLoading(false);
     })();
   }, [activeChild?.id, school?.id]);
 
   if (!activeChild) {
-    return <div className="p-12 text-center text-sm text-muted-foreground">No children linked to your account.</div>;
+    return (
+      <EmptyState
+        icon={Users}
+        title="No children linked"
+        description="Your account isn't linked to any students yet. Please contact the school office."
+      />
+    );
   }
+  if (loading) return <BookLoader fullPage label="Loading dashboard…" />;
 
   const cards = [
     { label: "This month attendance", value: stats.attendancePct == null ? "—" : `${stats.attendancePct}%`, icon: CalendarCheck, soft: "bg-success-soft", color: "text-success", to: "/attendance" },

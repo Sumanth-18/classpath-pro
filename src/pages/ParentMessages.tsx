@@ -101,7 +101,11 @@ export default function ParentMessages() {
       <Card className="flex flex-col h-[60vh]">
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {messages.length === 0 ? (
-            <p className="text-center text-sm text-muted-foreground py-12">Say hello to start the conversation.</p>
+            <EmptyState
+              icon={MessageSquare}
+              title="Start the conversation"
+              description={teacherName ? `Send your first message to ${teacherName}.` : "Class teacher will be set up soon."}
+            />
           ) : messages.map((m) => {
             const mine = m.sender_id === user?.id;
             return (

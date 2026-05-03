@@ -223,6 +223,7 @@ export default function AdminDashboard() {
       .map((s: any) => ({ id: s.id, label: `${s.classes?.name ?? "Class"} - ${s.name}` }));
 
     setDigest({ lowAttendance, feeThisMonth, feeLastMonth, staleUnread, sectionsMissingToday });
+    setDigestUpdatedAt(new Date());
     setDigestLoading(false);
   };
   useEffect(() => { if (role === "school_admin") loadDigest(); /* eslint-disable-next-line */ }, [school?.id, role]);

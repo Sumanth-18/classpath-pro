@@ -150,8 +150,12 @@ export default function TeacherMessages() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-[70vh]">
         <Card className="md:col-span-1 overflow-y-auto">
           {convos.length === 0 ? (
-            <div className="p-6 text-center text-sm text-muted-foreground">
-              No parents linked to your class yet.
+            <div className="p-4">
+              <EmptyState
+                icon={Users}
+                title="No parent conversations yet"
+                description="When parents in your class send a message, it will show up here."
+              />
             </div>
           ) : convos.map((c) => (
             <button

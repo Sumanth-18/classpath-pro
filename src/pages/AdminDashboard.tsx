@@ -588,22 +588,31 @@ export default function AdminDashboard() {
               View all <ArrowRight className="h-3 w-3" />
             </button>
           </div>
-          <ul className="space-y-2">
-            {announcements.length === 0 && !loading && (
-              <li className="text-sm text-muted-foreground py-6 text-center">No announcements yet.</li>
-            )}
-            {announcements.map((a) => (
-              <li key={a.id} className="flex items-start gap-3 rounded-xl p-3 hover:bg-muted/60 transition">
-                <div className="h-9 w-9 rounded-xl bg-brand-50 flex items-center justify-center shrink-0">
-                  <Bell className="h-4 w-4 text-brand-600" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-foreground line-clamp-1">{a.title}</div>
-                  <div className="text-[11px] text-muted-foreground mt-0.5">{timeAgo(a.created_at)}</div>
-                </div>
-              </li>
-            ))}
-          </ul>
+          {loading ? (
+            <BookLoader />
+          ) : announcements.length === 0 ? (
+            <EmptyState
+              icon={Bell}
+              title="No announcements yet"
+              description="Posted announcements will appear here."
+              actionLabel="Create announcement"
+              onAction={() => navigate("/connect")}
+            />
+          ) : (
+            <ul className="space-y-2">
+              {announcements.map((a) => (
+                <li key={a.id} className="flex items-start gap-3 rounded-xl p-3 hover:bg-muted/60 transition">
+                  <div className="h-9 w-9 rounded-xl bg-brand-50 flex items-center justify-center shrink-0">
+                    <Bell className="h-4 w-4 text-brand-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium text-foreground line-clamp-1">{a.title}</div>
+                    <div className="text-[11px] text-muted-foreground mt-0.5">{timeAgo(a.created_at)}</div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         <div className="space-y-3">

@@ -197,7 +197,11 @@ export default function TeacherMessages() {
               </div>
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 {messages.length === 0 ? (
-                  <p className="text-center text-sm text-muted-foreground py-12">No messages yet.</p>
+                  <EmptyState
+                    icon={MessageSquare}
+                    title="No messages yet"
+                    description={`Start the conversation with ${activeStudent.parent_name}.`}
+                  />
                 ) : messages.map((m) => {
                   const mine = m.sender_id === user?.id;
                   return (

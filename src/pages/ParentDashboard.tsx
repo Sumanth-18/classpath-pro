@@ -140,7 +140,7 @@ export default function ParentDashboard() {
           <button onClick={() => navigate("/announcements")} className="text-xs font-semibold text-primary hover:underline">View all</button>
         </div>
         {announcements.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-4 text-center">No announcements yet.</p>
+          <EmptyState icon={Bell} title="No announcements yet" description="Updates from the school will appear here." />
         ) : (
           <ul className="space-y-2">
             {announcements.map((a) => (

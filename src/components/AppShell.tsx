@@ -199,6 +199,7 @@ export function AppShell({ children }: Props) {
               {role === "parent" && childCtx && childCtx.children.length > 1 && (
                 <ChildSelector />
               )}
+              {role === "school_admin" && <GlobalSearch />}
             </div>
 
             <button className="relative h-9 w-9 rounded-xl flex items-center justify-center hover:bg-muted" aria-label="Notifications">

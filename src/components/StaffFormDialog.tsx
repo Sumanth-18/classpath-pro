@@ -144,6 +144,9 @@ export function StaffFormDialog({ open, onOpenChange, schoolId, existing, onSave
     e.preventDefault();
     if (!name.trim()) { toast.error("Name is required"); return; }
     if (!isEdit && !email.trim()) { toast.error("Email is required for new staff"); return; }
+    if (email.trim() && !/^\S+@\S+\.\S+$/.test(email.trim())) { toast.error("Enter a valid email"); return; }
+    if (phone.trim() && !/^[+\d][\d\s-]{6,15}$/.test(phone.trim())) { toast.error("Enter a valid phone number"); return; }
+    if (salary && (Number(salary) < 0 || isNaN(Number(salary)))) { toast.error("Salary must be a positive number"); return; }
 
     setSubmitting(true);
 

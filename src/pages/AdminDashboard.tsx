@@ -175,6 +175,7 @@ export default function AdminDashboard() {
       });
       out.sort((a, b) => a.pct - b.pct);
       setAtRisk(out);
+      setAtRiskUpdatedAt(new Date());
     })();
   }, [school?.id, role]);
 

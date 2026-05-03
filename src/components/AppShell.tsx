@@ -4,6 +4,7 @@ import { useAuth, AppRole } from "@/contexts/AuthContext";
 import { SchoolOSLogo } from "@/components/SchoolOSLogo";
 import { Button } from "@/components/ui/button";
 import { ChildSelector } from "@/components/ChildSelector";
+import { GlobalSearch } from "@/components/GlobalSearch";
 import { useChild } from "@/contexts/ChildContext";
 import { supabase } from "@/integrations/supabase/client";
 import {

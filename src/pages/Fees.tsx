@@ -34,6 +34,7 @@ import {
 import { FeeStructureDialog } from "@/components/FeeStructureDialog";
 import { RecordPaymentDialog } from "@/components/RecordPaymentDialog";
 import { FlagFollowupDialog } from "@/components/FlagFollowupDialog";
+import { TypeToConfirmDialog } from "@/components/TypeToConfirmDialog";
 
 // ----- types -----
 export interface FeeStructureRow {
@@ -153,6 +154,7 @@ function StructuresTab({ schoolId }: { schoolId: string }) {
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [edit, setEdit] = useState<FeeStructureRow | null>(null);
+  const [deleteRow, setDeleteRow] = useState<FeeStructureRow | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -189,8 +191,7 @@ function StructuresTab({ schoolId }: { schoolId: string }) {
 
   useEffect(() => { load(); }, [schoolId]);
 
-  const remove = async (id: string) => {
-    if (!confirm("Delete this fee category? Linked classes and instalments will also be removed.")) return;
+  const performDelete = async (id: string) => {
     await sb.from("fee_instalments").delete().eq("fee_structure_id", id);
     await sb.from("fee_structure_classes").delete().eq("fee_structure_id", id);
     const { error } = await supabase.from("fee_structures").delete().eq("id", id);
@@ -256,7 +257,7 @@ function StructuresTab({ schoolId }: { schoolId: string }) {
                     <Button variant="ghost" size="icon" onClick={() => { setEdit(r); setOpen(true); }}>
                       <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => remove(r.id)}>
+                    <Button variant="ghost" size="icon" onClick={() => setDeleteRow(r)}>
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
                   </TableCell>

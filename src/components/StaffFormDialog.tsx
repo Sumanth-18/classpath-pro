@@ -382,6 +382,28 @@ export function StaffFormDialog({ open, onOpenChange, schoolId, existing, onSave
           </DialogFooter>
         </form>
       </DialogContent>
+
+      <ConfirmDialog
+        open={removeAssignmentOpen}
+        onOpenChange={setRemoveAssignmentOpen}
+        title="Remove class teacher assignment?"
+        description="This teacher will no longer be the class teacher for their current section. You can reassign them later."
+        confirmLabel="Remove assignment"
+        destructive
+        onConfirm={() => { setClassTeacherSection("none"); setRemoveAssignmentOpen(false); }}
+      />
+
+      <ConfirmDialog
+        open={!!reassignTo}
+        onOpenChange={(v) => { if (!v) setReassignTo(null); }}
+        title="Reassign class teacher?"
+        description={reassignTo ? `${reassignTo.label} is currently assigned to ${reassignTo.currentName}. Reassigning will replace them.` : ""}
+        confirmLabel="Reassign"
+        onConfirm={() => {
+          if (reassignTo) setClassTeacherSection(reassignTo.sectionId);
+          setReassignTo(null);
+        }}
+      />
     </Dialog>
   );
 }

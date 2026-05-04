@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
 import { toast } from "@/lib/toast";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import type { StaffRow, StaffRole } from "@/pages/Staff";
 
 interface Props {
@@ -58,6 +59,8 @@ export function StaffFormDialog({ open, onOpenChange, schoolId, existing, onSave
   const [sections, setSections] = useState<SectionOpt[]>([]);
   const [classTeacherSection, setClassTeacherSection] = useState<string>("none");
   const [originalSection, setOriginalSection] = useState<string>("none");
+  const [removeAssignmentOpen, setRemoveAssignmentOpen] = useState(false);
+  const [reassignTo, setReassignTo] = useState<{ sectionId: string; label: string; currentName: string } | null>(null);
 
   // Load sections + their current class teachers (by profile.id)
   useEffect(() => {
@@ -323,7 +326,8 @@ export function StaffFormDialog({ open, onOpenChange, schoolId, existing, onSave
                 onValueChange={(v) => {
                   if (v === "none") {
                     if (originalSection !== "none") {
-                      if (!confirm("Remove class assignment for this teacher?")) return;
+                      setRemoveAssignmentOpen(true);
+                      return;
                     }
                     setClassTeacherSection("none");
                     return;
@@ -333,7 +337,8 @@ export function StaffFormDialog({ open, onOpenChange, schoolId, existing, onSave
                     opt?.current_teacher_id &&
                     opt.current_teacher_id !== existing?.profile_id
                   ) {
-                    if (!confirm(`${opt.label} is already assigned to ${opt.current_teacher_name}. Reassign?`)) return;
+                    setReassignTo({ sectionId: v, label: opt.label, currentName: opt.current_teacher_name ?? "another teacher" });
+                    return;
                   }
                   setClassTeacherSection(v);
                 }}
@@ -377,6 +382,28 @@ export function StaffFormDialog({ open, onOpenChange, schoolId, existing, onSave
           </DialogFooter>
         </form>
       </DialogContent>
+
+      <ConfirmDialog
+        open={removeAssignmentOpen}
+        onOpenChange={setRemoveAssignmentOpen}
+        title="Remove class teacher assignment?"
+        description="This teacher will no longer be the class teacher for their current section. You can reassign them later."
+        confirmLabel="Remove assignment"
+        destructive
+        onConfirm={() => { setClassTeacherSection("none"); setRemoveAssignmentOpen(false); }}
+      />
+
+      <ConfirmDialog
+        open={!!reassignTo}
+        onOpenChange={(v) => { if (!v) setReassignTo(null); }}
+        title="Reassign class teacher?"
+        description={reassignTo ? `${reassignTo.label} is currently assigned to ${reassignTo.currentName}. Reassigning will replace them.` : ""}
+        confirmLabel="Reassign"
+        onConfirm={() => {
+          if (reassignTo) setClassTeacherSection(reassignTo.sectionId);
+          setReassignTo(null);
+        }}
+      />
     </Dialog>
   );
 }

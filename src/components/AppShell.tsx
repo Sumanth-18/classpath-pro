@@ -160,12 +160,12 @@ export function AppShell({ children }: Props) {
 
   return (
     <div className="min-h-screen flex w-full bg-background">
-      <aside className="hidden lg:flex w-64 flex-col bg-sidebar border-r border-sidebar-border">
+      <aside className="hidden md:flex w-64 flex-col bg-sidebar border-r border-sidebar-border">
         {SidebarBody}
       </aside>
 
       {mobileOpen && (
-        <div className="lg:hidden fixed inset-0 z-50">
+        <div className="md:hidden fixed inset-0 z-50">
           <div className="absolute inset-0 bg-foreground/40" onClick={() => setMobileOpen(false)} />
           <aside className="absolute left-0 top-0 bottom-0 w-72 bg-sidebar border-r border-sidebar-border animate-fade-in">
             <button
@@ -181,17 +181,17 @@ export function AppShell({ children }: Props) {
       )}
 
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-14 lg:h-16 border-b border-border bg-card/80 backdrop-blur sticky top-0 z-30">
-          <div className="h-full px-4 lg:px-8 flex items-center justify-between gap-4">
+        <header className="h-14 md:h-16 border-b border-border bg-card/80 backdrop-blur sticky top-0 z-30">
+          <div className="h-full px-4 md:px-8 flex items-center justify-between gap-4">
             <button
-              className="lg:hidden h-9 w-9 rounded-lg flex items-center justify-center hover:bg-muted"
+              className="md:hidden h-9 w-9 rounded-lg flex items-center justify-center hover:bg-muted"
               onClick={() => setMobileOpen(true)}
               aria-label="Open menu"
             >
               <Menu className="h-5 w-5" />
             </button>
 
-            <div className="lg:hidden">
+            <div className="md:hidden">
               <SchoolOSLogo size="sm" withWordmark={false} />
             </div>
 
@@ -219,7 +219,7 @@ export function AppShell({ children }: Props) {
           </div>
         </header>
 
-        <main className="flex-1 p-4 lg:p-8 overflow-x-hidden">
+        <main className="flex-1 p-4 md:p-8 overflow-x-hidden">
           <div className="max-w-7xl mx-auto animate-fade-in">{children}</div>
         </main>
       </div>

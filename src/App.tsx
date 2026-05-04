@@ -16,6 +16,7 @@ import DashboardRouter from "./pages/DashboardRouter";
 import Students from "./pages/Students";
 import Staff from "./pages/Staff";
 import Attendance from "./pages/Attendance";
+import Grades from "./pages/Grades";
 import ParentAttendance from "./pages/ParentAttendance";
 import Fees from "./pages/Fees";
 import Messages from "./pages/Messages";
@@ -75,7 +76,11 @@ const App = () => (
                     <AppShell><ErrorBoundary><ParentOrStaffAttendance /></ErrorBoundary></AppShell>
                   </ProtectedRoute>
                 } />
-                <Route path="/grades" element={<Shell><ComingSoon title="Grade Book" description="Enter and manage student marks" /></Shell>} />
+                <Route path="/grades" element={
+                  <ProtectedRoute allow={["school_admin", "teacher"]}>
+                    <AppShell><ErrorBoundary><Grades /></ErrorBoundary></AppShell>
+                  </ProtectedRoute>
+                } />
                 <Route path="/marks" element={
                   <ProtectedRoute allow={["parent"]}>
                     <AppShell><ErrorBoundary><ParentMarks /></ErrorBoundary></AppShell>

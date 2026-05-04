@@ -276,6 +276,16 @@ function StructuresTab({ schoolId }: { schoolId: string }) {
         existing={edit}
         onSaved={() => { setOpen(false); load(); }}
       />
+
+      <TypeToConfirmDialog
+        open={!!deleteRow}
+        onOpenChange={(v) => { if (!v) setDeleteRow(null); }}
+        title={`Delete fee category "${deleteRow?.name ?? ""}"?`}
+        description="This will also remove all linked classes and instalments. This action cannot be undone."
+        confirmText={deleteRow?.name ?? ""}
+        confirmLabel="Delete category"
+        onConfirm={() => deleteRow && performDelete(deleteRow.id)}
+      />
     </div>
   );
 }

@@ -59,6 +59,8 @@ export function StaffFormDialog({ open, onOpenChange, schoolId, existing, onSave
   const [sections, setSections] = useState<SectionOpt[]>([]);
   const [classTeacherSection, setClassTeacherSection] = useState<string>("none");
   const [originalSection, setOriginalSection] = useState<string>("none");
+  const [removeAssignmentOpen, setRemoveAssignmentOpen] = useState(false);
+  const [reassignTo, setReassignTo] = useState<{ sectionId: string; label: string; currentName: string } | null>(null);
 
   // Load sections + their current class teachers (by profile.id)
   useEffect(() => {
@@ -324,7 +326,8 @@ export function StaffFormDialog({ open, onOpenChange, schoolId, existing, onSave
                 onValueChange={(v) => {
                   if (v === "none") {
                     if (originalSection !== "none") {
-                      if (!confirm("Remove class assignment for this teacher?")) return;
+                      setRemoveAssignmentOpen(true);
+                      return;
                     }
                     setClassTeacherSection("none");
                     return;
@@ -334,7 +337,8 @@ export function StaffFormDialog({ open, onOpenChange, schoolId, existing, onSave
                     opt?.current_teacher_id &&
                     opt.current_teacher_id !== existing?.profile_id
                   ) {
-                    if (!confirm(`${opt.label} is already assigned to ${opt.current_teacher_name}. Reassign?`)) return;
+                    setReassignTo({ sectionId: v, label: opt.label, currentName: opt.current_teacher_name ?? "another teacher" });
+                    return;
                   }
                   setClassTeacherSection(v);
                 }}

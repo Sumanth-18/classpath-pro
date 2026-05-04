@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
 import { toast } from "@/lib/toast";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import type { StaffRow, StaffRole } from "@/pages/Staff";
 
 interface Props {

@@ -17,6 +17,9 @@ import Students from "./pages/Students";
 import Staff from "./pages/Staff";
 import Attendance from "./pages/Attendance";
 import Grades from "./pages/Grades";
+import Assignments from "./pages/Assignments";
+import Timetable from "./pages/Timetable";
+import Connect from "./pages/Connect";
 import ParentAttendance from "./pages/ParentAttendance";
 import Fees from "./pages/Fees";
 import Messages from "./pages/Messages";
@@ -106,14 +109,26 @@ const App = () => (
                     <AppShell><ErrorBoundary><ParentAnnouncements /></ErrorBoundary></AppShell>
                   </ProtectedRoute>
                 } />
-                <Route path="/assignments" element={<Shell><ComingSoon title="Assignments" description="Create and track assignments" /></Shell>} />
-                <Route path="/timetable" element={<Shell><ComingSoon title="Timetable" description="Section-wise class schedule" /></Shell>} />
+                <Route path="/assignments" element={
+                  <ProtectedRoute allow={["school_admin", "teacher"]}>
+                    <AppShell><ErrorBoundary><Assignments /></ErrorBoundary></AppShell>
+                  </ProtectedRoute>
+                } />
+                <Route path="/timetable" element={
+                  <ProtectedRoute allow={["school_admin", "teacher", "parent"]}>
+                    <AppShell><ErrorBoundary><Timetable /></ErrorBoundary></AppShell>
+                  </ProtectedRoute>
+                } />
                 <Route path="/staff" element={
                   <ProtectedRoute allow={["school_admin"]}>
                     <AppShell><ErrorBoundary><Staff /></ErrorBoundary></AppShell>
                   </ProtectedRoute>
                 } />
-                <Route path="/connect" element={<Shell><ComingSoon title="Connect" description="Announcements, SMS and school calendar" /></Shell>} />
+                <Route path="/connect" element={
+                  <ProtectedRoute allow={["school_admin"]}>
+                    <AppShell><ErrorBoundary><Connect /></ErrorBoundary></AppShell>
+                  </ProtectedRoute>
+                } />
 
                 <Route path="*" element={<NotFound />} />
               </Routes>

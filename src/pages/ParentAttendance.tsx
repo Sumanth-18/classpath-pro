@@ -38,6 +38,7 @@ export default function ParentAttendance() {
   const { user, school } = useAuth();
   const [month, setMonth] = useState<Date>(startOfMonth(new Date()));
   const [byDate, setByDate] = useState<Record<string, Status>>({});
+  const [eventDays, setEventDays] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
   // leave dialog
@@ -49,22 +50,29 @@ export default function ParentAttendance() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!activeChild?.id) { setByDate({}); return; }
+    if (!activeChild?.id) { setByDate({}); setEventDays({}); return; }
     setLoading(true);
     const ms = format(startOfMonth(month), "yyyy-MM-dd");
     const me = format(endOfMonth(month), "yyyy-MM-dd");
     (async () => {
-      const { data } = await supabase
-        .from("attendance")
-        .select("date, status")
-        .eq("student_id", activeChild.id)
-        .gte("date", ms).lte("date", me);
+      const [{ data: att }, { data: evs }] = await Promise.all([
+        supabase.from("attendance").select("date, status")
+          .eq("student_id", activeChild.id)
+          .gte("date", ms).lte("date", me),
+        school?.id
+          ? supabase.from("school_events").select("event_date, title, event_type")
+              .eq("school_id", school.id).gte("event_date", ms).lte("event_date", me)
+          : Promise.resolve({ data: [] }),
+      ]);
       const m: Record<string, Status> = {};
-      (data ?? []).forEach((r: any) => { m[r.date] = r.status as Status; });
+      (att ?? []).forEach((r: any) => { m[r.date] = r.status as Status; });
       setByDate(m);
+      const ev: Record<string, string> = {};
+      (evs ?? []).forEach((r: any) => { ev[r.event_date] = `${r.event_type}: ${r.title}`; });
+      setEventDays(ev);
       setLoading(false);
     })();
-  }, [activeChild?.id, month]);
+  }, [activeChild?.id, month, school?.id]);
 
   const days = useMemo(() => {
     const start = startOfMonth(month);
@@ -133,12 +141,14 @@ export default function ParentAttendance() {
           {days.all.map((d) => {
             const key = format(d, "yyyy-MM-dd");
             const status = byDate[key];
+            const event = eventDays[key];
             const weekend = isWeekend(d);
             let cls = "bg-muted text-muted-foreground";
             if (status) cls = STATUS_COLOR[status];
+            else if (event) cls = "bg-muted-foreground/30 text-foreground";
             else if (weekend) cls = "bg-muted/60 text-muted-foreground";
             return (
-              <div key={key} className="flex flex-col items-center gap-1">
+              <div key={key} className="flex flex-col items-center gap-1" title={event ?? undefined}>
                 <div className={cn("h-9 w-9 rounded-full flex items-center justify-center text-xs font-medium", cls)}>
                   {d.getDate()}
                 </div>

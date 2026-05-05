@@ -72,6 +72,7 @@ export type Database = {
           created_by: string | null
           description: string | null
           due_date: string | null
+          file_url: string | null
           id: string
           max_marks: number | null
           school_id: string
@@ -87,6 +88,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           due_date?: string | null
+          file_url?: string | null
           id?: string
           max_marks?: number | null
           school_id: string
@@ -102,6 +104,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           due_date?: string | null
+          file_url?: string | null
           id?: string
           max_marks?: number | null
           school_id?: string

@@ -141,12 +141,14 @@ export default function ParentAttendance() {
           {days.all.map((d) => {
             const key = format(d, "yyyy-MM-dd");
             const status = byDate[key];
+            const event = eventDays[key];
             const weekend = isWeekend(d);
             let cls = "bg-muted text-muted-foreground";
             if (status) cls = STATUS_COLOR[status];
+            else if (event) cls = "bg-muted-foreground/30 text-foreground";
             else if (weekend) cls = "bg-muted/60 text-muted-foreground";
             return (
-              <div key={key} className="flex flex-col items-center gap-1">
+              <div key={key} className="flex flex-col items-center gap-1" title={event ?? undefined}>
                 <div className={cn("h-9 w-9 rounded-full flex items-center justify-center text-xs font-medium", cls)}>
                   {d.getDate()}
                 </div>

@@ -34,7 +34,7 @@ const NAV: NavItem[] = [
   { to: "/assignments", label: "Assignments", icon: ClipboardList, roles: ["school_admin", "teacher"] },
   { to: "/timetable", label: "Timetable", icon: Clock, roles: ["school_admin", "teacher"] },
   { to: "/staff", label: "Staff / HR", icon: UserCog, roles: ["school_admin"] },
-  { to: "/connect", label: "Connect", icon: Megaphone, roles: ["school_admin", "teacher"] },
+  { to: "/connect", label: "Connect", icon: Megaphone, roles: ["school_admin"] },
 ];
 
 const ROLE_LABEL: Record<AppRole, string> = {

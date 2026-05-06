@@ -79,17 +79,47 @@ export default function ParentDashboard() {
 
       let lastExamPct: number | null = null;
       const exam = (exams ?? [])[0];
+      let recent: { examName: string; rows: Mark[] } | null = null;
       if (exam) {
-        const { data: marks } = await supabase.from("marks").select("marks_obtained, max_marks").eq("student_id", childId).eq("exam_id", exam.id);
+        const { data: marks } = await supabase
+          .from("marks")
+          .select("id, marks_obtained, max_marks, subjects(name)")
+          .eq("student_id", childId)
+          .eq("exam_id", exam.id);
         if (marks && marks.length) {
           const obt = marks.reduce((s: number, m: any) => s + Number(m.marks_obtained ?? 0), 0);
           const max = marks.reduce((s: number, m: any) => s + Number(m.max_marks ?? 0), 0);
           lastExamPct = max > 0 ? Math.round((obt / max) * 100) : null;
+          recent = { examName: exam.name, rows: marks as any };
         }
       }
 
+      // Today's timetable
+      let ttRows: TT[] = [];
+      if (sectionId) {
+        const { data: tt } = await supabase
+          .from("timetable")
+          .select("id, period_number, subjects(name), profiles:teacher_id(name)")
+          .eq("section_id", sectionId)
+          .eq("day_of_week", dow)
+          .order("period_number", { ascending: true });
+        ttRows = (tt ?? []) as any;
+      }
+
+      // Upcoming events
+      const { data: ev } = await supabase
+        .from("school_events")
+        .select("id, title, event_date, event_type")
+        .eq("school_id", school.id)
+        .gte("event_date", todayStr)
+        .order("event_date", { ascending: true })
+        .limit(5);
+
       setStats({ attendancePct, pendingFee, pendingHomework, lastExamPct });
       setAnnouncements((ann ?? []) as Announcement[]);
+      setTodayTT(ttRows);
+      setEvents((ev ?? []) as Evt[]);
+      setRecentMarks(recent);
       setLoading(false);
     })();
   }, [activeChild?.id, school?.id]);

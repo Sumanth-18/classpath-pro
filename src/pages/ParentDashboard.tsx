@@ -4,10 +4,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useChild } from "@/contexts/ChildContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { CalendarCheck, Wallet, ClipboardList, BookOpen, Bell, ChevronRight, Users } from "lucide-react";
+import { CalendarCheck, Wallet, ClipboardList, BookOpen, Bell, ChevronRight, Users, Clock, CalendarDays, Trophy } from "lucide-react";
 import { BookLoader } from "@/components/BookLoader";
 import { EmptyState } from "@/components/EmptyState";
-import { startOfMonth, endOfMonth, format, parseISO } from "date-fns";
+import { startOfMonth, endOfMonth, format } from "date-fns";
 
 const sb: any = supabase;
 

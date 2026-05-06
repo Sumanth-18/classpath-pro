@@ -1,1 +1,4 @@
 project_id = "vlmcpsonchugkkscstyy"
+
+[functions.parent-login]
+verify_jwt = false

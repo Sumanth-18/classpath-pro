@@ -45,6 +45,7 @@ export function StudentDetailDialog({ open, onOpenChange, studentId }: Props) {
   const [student, setStudent] = useState<StudentDetail | null>(null);
   const [counts, setCounts] = useState<Counts>({ present: 0, absent: 0, late: 0, totalDue: 0, totalPaid: 0 });
   const [loading, setLoading] = useState(false);
+  const [parentDialogOpen, setParentDialogOpen] = useState(false);
 
   useEffect(() => {
     if (!open || !studentId) return;
@@ -140,9 +141,23 @@ export function StudentDetailDialog({ open, onOpenChange, studentId }: Props) {
                 <StatBox label="Fees pending" value={`₹${counts.totalDue.toLocaleString("en-IN")}`} tone="destructive" />
               </div>
             </div>
+
+            <Button
+              variant="outline"
+              className="w-full rounded-xl"
+              onClick={() => setParentDialogOpen(true)}
+            >
+              <KeyRound className="h-4 w-4 mr-2" /> Set up parent login
+            </Button>
           </div>
         )}
       </DialogContent>
+      <AddParentLoginDialog
+        open={parentDialogOpen}
+        onOpenChange={setParentDialogOpen}
+        studentId={student?.id ?? null}
+        studentName={student?.name}
+      />
     </Dialog>
   );
 }

@@ -197,6 +197,88 @@ export default function ParentDashboard() {
           </ul>
         )}
       </Card>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card className="p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-base font-display font-semibold flex items-center gap-2"><Clock className="h-4 w-4 text-info" /> Today's classes</h2>
+            <button onClick={() => navigate("/timetable")} className="text-xs font-semibold text-primary hover:underline">Full week</button>
+          </div>
+          {todayTT.length === 0 ? (
+            <EmptyState icon={Clock} title="No classes today" description="Enjoy the day off!" />
+          ) : (
+            <ul className="space-y-2">
+              {todayTT.map((p) => (
+                <li key={p.id} className="flex items-center gap-3 rounded-xl p-2.5 bg-muted/40">
+                  <div className="h-8 w-8 rounded-lg bg-info-soft flex items-center justify-center text-xs font-semibold text-info shrink-0">
+                    {p.period_number}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium truncate">{p.subjects?.name ?? "—"}</div>
+                    <div className="text-[11px] text-muted-foreground truncate">{p.profiles?.name ?? "Teacher TBD"}</div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+
+        <Card className="p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-base font-display font-semibold flex items-center gap-2"><CalendarDays className="h-4 w-4 text-violet" /> Upcoming events</h2>
+          </div>
+          {events.length === 0 ? (
+            <EmptyState icon={CalendarDays} title="No upcoming events" description="Check back later for school events." />
+          ) : (
+            <ul className="space-y-2">
+              {events.map((e) => {
+                const d = new Date(e.event_date);
+                return (
+                  <li key={e.id} className="flex items-center gap-3 rounded-xl p-2.5 bg-muted/40">
+                    <div className="h-10 w-10 rounded-lg bg-violet-soft flex flex-col items-center justify-center shrink-0">
+                      <div className="text-[9px] font-semibold uppercase text-violet leading-none">{format(d, "MMM")}</div>
+                      <div className="text-sm font-bold text-violet leading-none mt-0.5">{format(d, "d")}</div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium truncate">{e.title}</div>
+                      <div className="text-[11px] text-muted-foreground capitalize">{e.event_type ?? "event"}</div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </Card>
+      </div>
+
+      <Card className="p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-base font-display font-semibold flex items-center gap-2"><Trophy className="h-4 w-4 text-warning" /> Recent marks {recentMarks && <span className="text-xs font-normal text-muted-foreground">· {recentMarks.examName}</span>}</h2>
+          <button onClick={() => navigate("/marks")} className="text-xs font-semibold text-primary hover:underline">View all</button>
+        </div>
+        {!recentMarks ? (
+          <EmptyState icon={Trophy} title="No published results yet" description="Results will appear here once teachers publish marks." />
+        ) : (
+          <ul className="space-y-2">
+            {recentMarks.rows.map((m) => {
+              const obt = Number(m.marks_obtained ?? 0);
+              const max = Number(m.max_marks ?? 0);
+              const pct = max > 0 ? Math.round((obt / max) * 100) : 0;
+              return (
+                <li key={m.id} className="rounded-xl p-2.5 bg-muted/40">
+                  <div className="flex items-center justify-between text-sm mb-1">
+                    <span className="font-medium truncate">{m.subjects?.name ?? "Subject"}</span>
+                    <span className="font-mono text-xs text-muted-foreground">{obt}/{max}</span>
+                  </div>
+                  <div className="h-1.5 rounded-full bg-background overflow-hidden">
+                    <div className="h-full bg-gradient-brand" style={{ width: `${Math.min(pct, 100)}%` }} />
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </Card>
     </div>
   );
 }

@@ -19,6 +19,9 @@ interface Stats {
 }
 
 interface Announcement { id: string; title: string; created_at: string; content: string | null }
+interface TT { id: string; period_number: number; subjects: { name: string } | null; profiles: { name: string } | null }
+interface Evt { id: string; title: string; event_date: string; event_type: string | null }
+interface Mark { id: string; marks_obtained: number | null; max_marks: number | null; subjects: { name: string } | null }
 
 function timeAgo(iso: string) {
   const diff = Date.now() - new Date(iso).getTime();
@@ -35,14 +38,20 @@ export default function ParentDashboard() {
   const navigate = useNavigate();
   const [stats, setStats] = useState<Stats>({ attendancePct: null, pendingFee: 0, pendingHomework: 0, lastExamPct: null });
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [todayTT, setTodayTT] = useState<TT[]>([]);
+  const [events, setEvents] = useState<Evt[]>([]);
+  const [recentMarks, setRecentMarks] = useState<{ examName: string; rows: Mark[] } | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!activeChild?.id || !school?.id) return;
     const childId = activeChild.id;
     const sectionId = activeChild.section_id;
-    const monthStart = format(startOfMonth(new Date()), "yyyy-MM-dd");
-    const monthEnd = format(endOfMonth(new Date()), "yyyy-MM-dd");
+    const today = new Date();
+    const todayStr = format(today, "yyyy-MM-dd");
+    const dow = today.getDay(); // 0=Sun
+    const monthStart = format(startOfMonth(today), "yyyy-MM-dd");
+    const monthEnd = format(endOfMonth(today), "yyyy-MM-dd");
 
     (async () => {
       const [{ data: attRows }, { data: dues }, { data: pays }, { data: assignments }, { data: subs }, { data: exams }, { data: ann }] = await Promise.all([

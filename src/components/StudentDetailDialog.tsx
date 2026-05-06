@@ -3,7 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import { Loader2, User, Hash, Calendar, GraduationCap, Users } from "lucide-react";
+import { Loader2, User, Hash, Calendar, GraduationCap, KeyRound } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { AddParentLoginDialog } from "@/components/AddParentLoginDialog";
 
 interface Props {
   open: boolean;
